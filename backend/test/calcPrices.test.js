@@ -1,4 +1,4 @@
-const { calcPrices } = require('../utils/calcPrices');
+import { calcPrices } from '../utils/calcPrices.js';
 
 describe('calcPrices', () => {
   test('Tính tổng tiền đúng', () => {

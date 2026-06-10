@@ -13,7 +13,7 @@
     "data:destroy": "node backend/seeder -d",
     "build": "npm install && npm install --prefix frontend && npm run build --prefix frontend",
     "generate-toc": "markdown-toc -i readme.md",
-    "test": "jest --forceExit --detectOpenHandles"
+    "test": "node --experimental-vm-modules node_modules/.bin/jest --forceExit --detectOpenHandles"
   },
   "author": "Brad Traversy",
   "license": "MIT",
@@ -34,5 +34,11 @@
     "markdown-toc": "^1.2.0",
     "nodemon": "^2.0.21",
     "supertest": "^7.2.2"
+  },
+  "jest": {
+    "extensionsToTreatAsEsm": [
+      ".js"
+    ],
+    "transform": {}
   }
 }

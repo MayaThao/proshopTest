@@ -2,7 +2,7 @@ name: Run Jest Tests
 
 on:
   push:
-    branches: [main , test/PROJ-17-admin-routes]
+    branches: ['**']
   pull_request:
     branches: [main]
 

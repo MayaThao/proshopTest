@@ -1,6 +1,6 @@
 import request from 'supertest';
 
-const app = 'http://localhost:5000'; 
+const app = 'http://127.0.0.1:5000'; 
 
 describe('Feature 3 — User Profile Testing (Sprint 2 - PROJ-11)', () => {
   let authCookie; 

@@ -1,24 +1,24 @@
-const request = require('supertest');
+import request from 'supertest';
+
 const app = 'http://localhost:5000'; 
 
 describe('Feature 3 — User Profile Testing (Sprint 2 - PROJ-11)', () => {
-  let authCookie; // Dùng Cookie để lưu trạng thái đăng nhập thay vì biến token chuỗi
+  let authCookie; 
   const testEmail = 'tung.testprofile@example.com'; 
 
   beforeAll(async () => {
     /**
      * Đăng nhập chuẩn xác qua route thực tế: /api/users/auth
-     * Hãy chắc chắn tài khoản email và password này đang tồn tại trong Database thực tế của bạn
+     * Đảm bảo tài khoản email và password này đang tồn tại trong Database thực tế của bạn
      */
     const loginRes = await request(app)
       .post('/api/users/auth') 
       .send({
-        email: 'john@email.com', // <-- THAY THẾ: Bằng Email có thật trong DB của bạn
-        password: '123456'          // <-- THAY THẾ: Bằng Password chính xác của tài khoản đó
+        email: 'tung.testprofile@example.com', // <-- SỬA LẠI: Email có thật trong DB của bạn
+        password: 'newSecurePassword123'          // <-- SỬA LẠI: Password chính xác của tài khoản đó
       });
 
     if (loginRes.statusCode === 200) {
-      // Vì hàm generateToken lưu token vào cookie, ta sẽ bốc đầu chuỗi Cookie từ Header trả về
       authCookie = loginRes.headers['set-cookie']; 
       console.log('Successfully authenticated via Cookie!');
     } else {
@@ -30,7 +30,7 @@ describe('Feature 3 — User Profile Testing (Sprint 2 - PROJ-11)', () => {
   it('TC_3.1: Should return 200 OK and profile data for logged-in user', async () => {
     const res = await request(app)
       .get('/api/users/profile')
-      .set('Cookie', authCookie); // Gửi kèm Cookie xác thực lên Server
+      .set('Cookie', authCookie);
 
     expect(res.statusCode).toEqual(200);
     expect(res.body).toHaveProperty('name');
@@ -40,7 +40,7 @@ describe('Feature 3 — User Profile Testing (Sprint 2 - PROJ-11)', () => {
   // TC_3.2: getUserProfile – 401
   it('TC_3.2: Should return 401 Unauthorized when no token is provided', async () => {
     const res = await request(app)
-      .get('/api/users/profile'); // Không gửi kèm Cookie
+      .get('/api/users/profile');
 
     expect(res.statusCode).toEqual(401);
   });
@@ -52,7 +52,7 @@ describe('Feature 3 — User Profile Testing (Sprint 2 - PROJ-11)', () => {
       .set('Cookie', authCookie);
 
     expect(res.statusCode).toEqual(200);
-    expect(res.body.password).toBeUndefined(); // Xác thực field password không xuất hiện đúng như code Controller
+    expect(res.body.password).toBeUndefined();
   });
 
   // TC_3.4: updateUserProfile
@@ -71,7 +71,6 @@ describe('Feature 3 — User Profile Testing (Sprint 2 - PROJ-11)', () => {
     expect(res.body.name).toEqual(updatedData.name);
     expect(res.body.email).toEqual(updatedData.email);
     
-    // Đồng bộ lại Cookie nếu Server cấp Cookie mới sau khi lưu thông tin
     if (res.headers['set-cookie']) {
       authCookie = res.headers['set-cookie'];
     }
@@ -90,12 +89,11 @@ describe('Feature 3 — User Profile Testing (Sprint 2 - PROJ-11)', () => {
 
     expect(res.statusCode).toEqual(200);
     
-    // Kiểm tra đăng nhập lại bằng mật khẩu mới vừa đổi qua endpoint chuẩn /api/users/auth
     const loginRes = await request(app)
       .post('/api/users/auth')
       .send({
-        email: testEmail, // Đăng nhập lại với email đã bị đổi ở TC_3.4
-        password: 'newSecurePassword123' // Mật khẩu mới vừa đổi ở trên
+        email: testEmail, 
+        password: 'newSecurePassword123' 
       });
     expect(loginRes.statusCode).toEqual(200);
   });

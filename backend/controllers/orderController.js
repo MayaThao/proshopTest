@@ -128,6 +128,12 @@ const updateOrderToDelivered = asyncHandler(async (req, res) => {
   const order = await Order.findById(req.params.id);
 
   if (order) {
+    // thêm điều kiện kiểm tra đơn hàng
+    if (!order.isPaid) {
+      res.status(400); 
+      throw new Error('Order not paid');
+    }
+
     order.isDelivered = true;
     order.deliveredAt = Date.now();
 

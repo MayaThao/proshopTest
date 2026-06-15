@@ -2,7 +2,7 @@ name: Run Jest Tests
 
 on:
   push:
-    branches: [main , test/PROJ-11-user-profile]
+    branches: ['**']
   pull_request:
     branches: [main]
 

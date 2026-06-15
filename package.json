@@ -13,11 +13,7 @@
     "data:destroy": "node backend/seeder -d",
     "build": "npm install && npm install --prefix frontend && npm run build --prefix frontend",
     "generate-toc": "markdown-toc -i readme.md",
-<<<<<<< HEAD
-    "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest"
-=======
-    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --forceExit --detectOpenHandles --verbose"
->>>>>>> fc22bff007eb99e6081053fbe37455847531bf69
+"test": "node --experimental-vm-modules node_modules/jest/bin/jest.js --forceExit --detectOpenHandles --verbose"
   },
   "author": "Brad Traversy",
   "license": "MIT",
@@ -42,8 +38,7 @@
     "markdown-toc": "^1.2.0",
     "nodemon": "^2.0.21",
     "supertest": "^7.2.2"
-<<<<<<< HEAD
-=======
+
   },
   "jest": {
     "transform": {},
@@ -54,6 +49,5 @@
     "setupFiles": [
       "./backend/test/setup.js"
     ]
->>>>>>> fc22bff007eb99e6081053fbe37455847531bf69
   }
 }

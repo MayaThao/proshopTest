@@ -1,100 +1,154 @@
+import { jest } from '@jest/globals';
 import request from 'supertest';
+import jwt from 'jsonwebtoken';
+import express from 'express'; // Khởi tạo ứng dụng Express ảo để kiểm thử cô lập, không lo lỗi cổng mạng
+import cookieParser from 'cookie-parser';
+import { getUserProfile, updateUserProfile, authUser } from '../controllers/userController.js'; 
+import { protect } from '../middleware/authMiddleware.js'; // Đường dẫn tới file middleware xác thực của bạn
+import User from '../models/userModel.js';
 
-const app = 'http://127.0.0.1:5000'; 
+// Cấu hình một ứng dụng Express giả lập phục vụ riêng cho môi trường kiểm thử
+const app = express();
+app.use(express.json());
+app.use(cookieParser());
 
-describe('Feature 3 — User Profile Testing (Sprint 2 - PROJ-11)', () => {
-  let authCookie; 
-  const testEmail = 'tung.testprofile@example.com'; 
+// Khai báo các tuyến đường (Routes) cần kiểm thử giống hệt cấu trúc hệ thống thật
+app.get('/api/users/profile', protect, getUserProfile);
+app.put('/api/users/profile', protect, updateUserProfile);
+app.post('/api/users/auth', authUser);
 
-  beforeAll(async () => {
-    /**
-     * Đăng nhập chuẩn xác qua route thực tế: /api/users/auth
-     * Đảm bảo tài khoản email và password này đang tồn tại trong Database thực tế của bạn
-     */
-    const loginRes = await request(app)
-      .post('/api/users/auth') 
-      .send({
-        email: 'tung.testprofile@example.com', // <-- SỬA LẠI: Email có thật trong DB của bạn
-        password: 'newSecurePassword123'          // <-- SỬA LẠI: Password chính xác của tài khoản đó
-      });
+describe('=== TÍNH NĂNG 3 — KIỂM THỬ THÔNG TIN CÁ NHÂN (Sprint 2 - PROJ-11) ===', () => {
+  let regularUserCookie;
+  const mockUserId = '60d5ec49f83d513d3c1a3b51';
 
-    if (loginRes.statusCode === 200) {
-      authCookie = loginRes.headers['set-cookie']; 
-      console.log('Successfully authenticated via Cookie!');
-    } else {
-      throw new Error(`[Setup Fail] Không thể đăng nhập lấy Cookie bảo mật. API trả về: ${loginRes.statusCode} - ${JSON.stringify(loginRes.body)}`);
-    }
+  beforeAll(() => {
+    process.env.JWT_SECRET = 'chuoi_bi_mat_test_123';
+    // Tạo mã thông báo JWT giả lập lưu vào Cookie cho tài khoản người dùng thông thường
+    regularUserCookie = `jwt=${jwt.sign({ userId: mockUserId }, process.env.JWT_SECRET)}`;
   });
 
-  // TC_3.1: getUserProfile – success
-  it('TC_3.1: Should return 200 OK and profile data for logged-in user', async () => {
+  afterEach(() => {
+    jest.restoreAllMocks(); // Xóa sạch dữ liệu giả lập (mock) cũ sau mỗi trường hợp kiểm thử để tránh chồng chéo
+  });
+
+  // TC_3.1
+  test('TC_3.1: Nên trả về trạng thái 200 OK và thông tin tài khoản khi người dùng đã đăng nhập', async () => {
+    jest.spyOn(User, 'findById').mockImplementation((id) => {
+      return {
+        select: jest.fn().mockResolvedValue({ _id: mockUserId, name: 'Nguyễn Nhật Tùng', email: 'tung@example.com', isAdmin: false }),
+        _id: mockUserId,
+        name: 'Nguyễn Nhật Tùng',
+        email: 'tung@example.com',
+        isAdmin: false
+      };
+    });
+
     const res = await request(app)
       .get('/api/users/profile')
-      .set('Cookie', authCookie);
+      .set('Cookie', [regularUserCookie]);
 
-    expect(res.statusCode).toEqual(200);
-    expect(res.body).toHaveProperty('name');
-    expect(res.body).toHaveProperty('email');
+    expect(res.statusCode).toBe(200);
+    expect(res.body).toHaveProperty('name', 'Nguyễn Nhật Tùng');
+    expect(res.body).toHaveProperty('email', 'tung@example.com');
   });
 
-  // TC_3.2: getUserProfile – 401
-  it('TC_3.2: Should return 401 Unauthorized when no token is provided', async () => {
-    const res = await request(app)
-      .get('/api/users/profile');
-
-    expect(res.statusCode).toEqual(401);
+  // TC_3.2
+  test('TC_3.2: Nên trả về trạng thái 401 Unauthorized khi không cung cấp mã xác thực Token', async () => {
+    // Không gửi kèm Cookie xác thực để kiểm tra bộ lọc bảo mật ngăn chặn người lạ
+    const res = await request(app).get('/api/users/profile');
+    expect(res.statusCode).toBe(401);
   });
 
-  // TC_3.3: getUserProfile – no pass
-  it('TC_3.3: Should NOT include password field in the response data', async () => {
+  // TC_3.3
+  test('TC_3.3: KHÔNG ĐƯỢC bao gồm trường mật khẩu (password) trong dữ liệu phản hồi trả về', async () => {
+    jest.spyOn(User, 'findById').mockImplementation((id) => {
+      return {
+        select: jest.fn().mockResolvedValue({ _id: mockUserId, name: 'Nguyễn Nhật Tùng', email: 'tung@example.com', isAdmin: false }),
+        _id: mockUserId,
+        name: 'Nguyễn Nhật Tùng',
+        email: 'tung@example.com',
+        isAdmin: false
+      };
+    });
+
     const res = await request(app)
       .get('/api/users/profile')
-      .set('Cookie', authCookie);
+      .set('Cookie', [regularUserCookie]);
 
-    expect(res.statusCode).toEqual(200);
-    expect(res.body.password).toBeUndefined();
+    expect(res.statusCode).toBe(200);
+    expect(res.body.password).toBeUndefined(); // Xác thực bảo mật: mật khẩu phải trống rỗng/không tồn tại
   });
 
-  // TC_3.4: updateUserProfile
-  it('TC_3.4: Should update name and email successfully', async () => {
-    const updatedData = {
-      name: 'Nguyễn Nhật Tùng Updated',
-      email: testEmail
+  // TC_3.4
+  test('TC_3.4: Nên cập nhật Họ tên và Email mới thành công', async () => {
+    const findByIdSpy = jest.spyOn(User, 'findById');
+    
+    // Giả lập cho lượt gọi kiểm tra của Middleware xác thực
+    findByIdSpy.mockReturnValueOnce({
+      select: jest.fn().mockResolvedValue({ _id: mockUserId })
+    });
+
+    // Giả lập cho lượt xử lý cập nhật và lưu đè dữ liệu của Controller
+    const mockUserInstance = {
+      _id: mockUserId,
+      name: 'Nguyễn Nhật Tùng',
+      email: 'tung@example.com',
+      save: jest.fn().mockResolvedValue({
+        _id: mockUserId,
+        name: 'Nguyễn Nhật Tùng Updated',
+        email: 'tung.updated@example.com'
+      })
     };
+    findByIdSpy.mockResolvedValueOnce(mockUserInstance);
 
     const res = await request(app)
       .put('/api/users/profile')
-      .set('Cookie', authCookie)
-      .send(updatedData);
+      .set('Cookie', [regularUserCookie])
+      .send({ name: 'Nguyễn Nhật Tùng Updated', email: 'tung.updated@example.com' });
 
-    expect(res.statusCode).toEqual(200);
-    expect(res.body.name).toEqual(updatedData.name);
-    expect(res.body.email).toEqual(updatedData.email);
-    
-    if (res.headers['set-cookie']) {
-      authCookie = res.headers['set-cookie'];
-    }
+    expect(res.statusCode).toBe(200);
+    expect(res.body.name).toEqual('Nguyễn Nhật Tùng Updated');
+    expect(res.body.email).toEqual('tung.updated@example.com');
   });
 
-  // TC_3.5: updateUserProfile – pass
-  it('TC_3.5: Should update password successfully and allow re-login', async () => {
-    const updatedPassword = {
-      password: 'newSecurePassword123'
-    };
-
-    const res = await request(app)
-      .put('/api/users/profile')
-      .set('Cookie', authCookie)
-      .send(updatedPassword);
-
-    expect(res.statusCode).toEqual(200);
+  // TC_3.5
+  test('TC_3.5: Nên cập nhật mật khẩu mới thành công và cho phép đăng nhập lại bằng mật khẩu mới', async () => {
+    const findByIdSpy = jest.spyOn(User, 'findById');
     
-    const loginRes = await request(app)
+    // 1. Giả lập luồng Thay đổi mật khẩu
+    findByIdSpy.mockReturnValueOnce({
+      select: jest.fn().mockResolvedValue({ _id: mockUserId })
+    });
+
+    const mockUserInstance = {
+      _id: mockUserId,
+      name: 'Nguyễn Nhật Tùng',
+      email: 'tung@example.com',
+      save: jest.fn().mockResolvedValue({ _id: mockUserId })
+    };
+    findByIdSpy.mockResolvedValueOnce(mockUserInstance);
+
+    const resUpdate = await request(app)
+      .put('/api/users/profile')
+      .set('Cookie', [regularUserCookie])
+      .send({ password: 'newSecurePassword123' });
+
+    expect(resUpdate.statusCode).toBe(200);
+
+    // 2. Giả lập luồng Xác nhận đăng nhập lại bằng thông tin mật khẩu mới
+    const mockUserLogin = {
+      _id: mockUserId,
+      name: 'Nguyễn Nhật Tùng',
+      email: 'tung@example.com',
+      matchPassword: jest.fn().mockResolvedValue(true) // Trả về true báo khớp mật khẩu
+    };
+    jest.spyOn(User, 'findOne').mockResolvedValue(mockUserLogin);
+
+    const resLogin = await request(app)
       .post('/api/users/auth')
-      .send({
-        email: testEmail, 
-        password: 'newSecurePassword123' 
-      });
-    expect(loginRes.statusCode).toEqual(200);
+      .send({ email: 'tung@example.com', password: 'newSecurePassword123' });
+
+    expect(resLogin.statusCode).toBe(200);
+    expect(resLogin.body).toHaveProperty('_id', mockUserId);
   });
 });

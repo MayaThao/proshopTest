@@ -1,0 +1,528 @@
+{
+  "info": {
+    "_postman_id": "4986d6c2-5342-490e-a82e-44c4d47841c2",
+    "name": "ProShopTest",
+    "description": "### Welcome to Postman! This is your first collection. \n\nCollections are your starting point for building and testing APIs. You can use this one to:\n\n• Group related requests\n• Test your API in real-world scenarios\n• Document and share your requests\n\nUpdate the name and overview whenever you’re ready to make it yours.\n\n[Learn more about Postman Collections.](https://learning.postman.com/docs/collections/collections-overview/)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "54291283",
+    "_collection_link": "https://go.postman.co/collection/54291283-4986d6c2-5342-490e-a82e-44c4d47841c2?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "login",
+          "item": [
+            {
+              "name": "TC_1.1 - Login success",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"TC_1.1: Status 200\", () => {\r",
+                      "    pm.response.to.have.status(200);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"TC_1.1: Trả về userInfo\", () => {\r",
+                      "    const body = pm.response.json();\r",
+                      "    pm.expect(body).to.have.property('email');\r",
+                      "    pm.expect(body).to.have.property('name');\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"TC_1.1: Cookie jwt được set\", () => {\r",
+                      "    pm.expect(pm.cookies.get('jwt')).to.not.be.undefined;\r",
+                      "});\r",
+                      "\r",
+                      "// Lưu jwt vào Environment \r",
+                      "const jwt = pm.cookies.get('jwt');\r",
+                      "pm.environment.set('jwt', jwt);"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      "pm.variables.set(\"expectedStatus\", \"200\");"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"email\": \"admin@email.com\",\r\n  \"password\": \"123456\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl }}/api/users/auth",
+                  "host": [
+                    "{{baseUrl }}"
+                  ],
+                  "path": [
+                    "api",
+                    "users",
+                    "auth"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "TC_1.2 - Login wrong password",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"TC_1.2: Status 401\", () => {\r",
+                      "    pm.response.to.have.status(401);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"TC_1.2: Message lỗi\", () => {\r",
+                      "    const body = pm.response.json();\r",
+                      "    pm.expect(body.message).to.match(/invalid email or password/i);\r",
+                      "});\r",
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      "pm.variables.set(\"expectedStatus\", \"401\");"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"email\": \"admin@email.com\",\r\n  \"password\": \"wrongpass\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl }}/api/users/auth",
+                  "host": [
+                    "{{baseUrl }}"
+                  ],
+                  "path": [
+                    "api",
+                    "users",
+                    "auth"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "TC_1.3 - Login missing email",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      "pm.variables.set(\"expectedStatus\", \"401\");"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"TC_1.3: Status 401\", () => {\r",
+                      "    pm.response.to.have.status(401);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"TC_1.3: Message lỗi\", () => {\r",
+                      "    const body = pm.response.json();\r",
+                      "    pm.expect(body.message).to.match(/invalid email or password/i);\r",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"password\": \"123456\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl }}/api/users/auth",
+                  "host": [
+                    "{{baseUrl }}"
+                  ],
+                  "path": [
+                    "api",
+                    "users",
+                    "auth"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Register",
+          "item": [
+            {
+              "name": "TC_1.4 - Register success",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      "pm.variables.set(\"expectedStatus\", \"201\");"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"TC_1.4: Status 201\", () => {\r",
+                      "    pm.response.to.have.status(201);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"TC_1.4: Trả về userInfo\", () => {\r",
+                      "    const body = pm.response.json();\r",
+                      "    pm.expect(body).to.have.property('email');\r",
+                      "    pm.expect(body).to.have.property('name');\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"TC_1.4: Cookie jwt được set\", () => {\r",
+                      "    pm.expect(pm.cookies.get('jwt')).to.not.be.undefined;\r",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"name\": \"Test User\",\r\n  \"email\": \"testuser123@email.com\",\r\n  \"password\": \"123456\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl }}/api/users",
+                  "host": [
+                    "{{baseUrl }}"
+                  ],
+                  "path": [
+                    "api",
+                    "users"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Logout",
+          "item": [
+            {
+              "name": "TC_1.6 - Logout",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"TC_1.6: Status 200\", () => {\r",
+                      "    pm.response.to.have.status(200);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"TC_1.6: Message logged out\", () => {\r",
+                      "    const body = pm.response.json();\r",
+                      "    pm.expect(body.message).to.match(/logged out successfully/i);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"TC_1.6: Cookie jwt bị xóa\", () => {\r",
+                      "    pm.expect(pm.cookies.get('jwt')).to.be.undefined;\r",
+                      "});\r",
+                      "\r",
+                      "// Xóa jwt khỏi Environment\r",
+                      "pm.environment.unset('jwt');"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl }}/api/users/logout",
+                  "host": [
+                    "{{baseUrl }}"
+                  ],
+                  "path": [
+                    "api",
+                    "users",
+                    "logout"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Middleware",
+          "item": [
+            {
+              "name": "TC_1.7 - protect valid token",
+              "request": {
+                "method": "GET",
+                "header": []
+              },
+              "response": []
+            },
+            {
+              "name": "TC_1.8 - protect no token",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      "pm.variables.set(\"expectedStatus\", \"401\");"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"TC_1.8: Status 401\", () => {\r",
+                      "    pm.response.to.have.status(401);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"TC_1.8: Not authorized\", () => {\r",
+                      "    const body = pm.response.json();\r",
+                      "    pm.expect(body.message).to.match(/not authorized/i);\r",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl }}/api/users/profile",
+                  "host": [
+                    "{{baseUrl }}"
+                  ],
+                  "path": [
+                    "api",
+                    "users",
+                    "profile"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "TC_1.9 - admin allowed",
+              "request": {
+                "method": "GET",
+                "header": []
+              },
+              "response": []
+            },
+            {
+              "name": "TC_1.10 - admin forbidden",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      "pm.variables.set(\"expectedStatus\", \"403\");\r",
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"TC_1.10: Status 403\", () => {\r",
+                      "    pm.response.to.have.status(403);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"TC_1.10: Not authorized as admin\", () => {\r",
+                      "    const body = pm.response.json();\r",
+                      "    pm.expect(body.message).to.match(/not authorized as an admin/i);\r",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl }}/api/users",
+                  "host": [
+                    "{{baseUrl }}"
+                  ],
+                  "path": [
+                    "api",
+                    "users"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "New Request",
+          "request": {
+            "method": "GET",
+            "header": []
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          "const expected = pm.variables.get(\"expectedStatus\");\r",
+          "const expectedCodes = expected\r",
+          "  ? expected.split(\",\").map(s => parseInt(s.trim()))\r",
+          "  : [200, 201];\r",
+          "\r",
+          "pm.variables.unset(\"expectedStatus\");\r",
+          "\r",
+          "if (!expectedCodes.includes(pm.response.code)) {\r",
+          "  pm.sendRequest({\r",
+          "    url: pm.environment.get(\"jiraUrl\") + \"/rest/api/2/issue\",\r",
+          "    method: \"POST\",\r",
+          "    header: {\r",
+          "      \"Authorization\": pm.environment.get(\"jiraToken\"),\r",
+          "      \"Content-Type\": \"application/json\"\r",
+          "    },\r",
+          "    body: {\r",
+          "      mode: \"raw\",\r",
+          "      raw: JSON.stringify({\r",
+          "        fields: {\r",
+          "          project:     { key: pm.environment.get(\"jiraProject\") },\r",
+          "          summary:     \"FAIL: \" + pm.info.requestName,\r",
+          "          description: \"📌 *Chi tiết:* Request thất bại ngoài ý muốn.\"\r",
+          "                       + \"\\n\\n📥 *Input:*\\n\" + pm.request.method + \" \" + pm.request.url\r",
+          "                       + \"\\n\\nBody: \" + (pm.request.body ? pm.request.body.toString() : \"none\")\r",
+          "                       + \"\\n\\n🖱️ *Thao tác:*\\n1. Chạy Postman Collection Runner\"\r",
+          "                       + \"\\n2. Request: \" + pm.request.method + \" \" + pm.request.url\r",
+          "                       + \"\\n3. Expected: \" + expectedCodes.join(\",\")\r",
+          "                       + \"\\n4. Actual: \" + pm.response.code\r",
+          "                       + \"\\n\\n📸 *Screenshot:*\\n{code}\"\r",
+          "                       + \"Status: \" + pm.response.code\r",
+          "                       + \"\\nResponse: \" + pm.response.text().substring(0, 500)\r",
+          "                       + \"{code}\",\r",
+          "          issuetype:   { name: \"Bug\" },\r",
+          "          priority:    { name: \"High\" }\r",
+          "        }\r",
+          "      })\r",
+          "    }\r",
+          "  });\r",
+          "}"
+        ]
+      }
+    }
+  ]
+}

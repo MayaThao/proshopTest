@@ -1,12 +1,19 @@
+import fs from 'fs';
 import path from 'path';
 import express from 'express';
 import multer from 'multer';
 
 const router = express.Router();
 
+// Đảm bảo thư mục uploads luôn tồn tại trên server (quan trọng với Render!)
+const uploadDir = path.join(process.cwd(), 'uploads');
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+
 const storage = multer.diskStorage({
   destination(req, file, cb) {
-    cb(null, 'uploads/');
+    cb(null, uploadDir);
   },
   filename(req, file, cb) {
     cb(
@@ -37,6 +44,10 @@ router.post('/', (req, res) => {
   uploadSingleImage(req, res, function (err) {
     if (err) {
       return res.status(400).send({ message: err.message });
+    }
+
+    if (!req.file) {
+      return res.status(400).send({ message: 'No image file provided' });
     }
 
     res.status(200).send({

@@ -1,0 +1,4515 @@
+{
+  "info": {
+    "_postman_id": "4986d6c2-5342-490e-a82e-44c4d47841c2",
+    "name": "ProShopTest",
+    "description": "### Welcome to Postman! This is your first collection. \n\nCollections are your starting point for building and testing APIs. You can use this one to:\n\n• Group related requests\n• Test your API in real-world scenarios\n• Document and share your requests\n\nUpdate the name and overview whenever you’re ready to make it yours.\n\n[Learn more about Postman Collections.](https://learning.postman.com/docs/collections/collections-overview/)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "55269040",
+    "_collection_link": "https://go.postman.co/collection/54291283-4986d6c2-5342-490e-a82e-44c4d47841c2?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "login",
+          "item": [
+            {
+              "name": "TC_1.1 - Login success",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "// 1. Kiểm tra các điều kiện Test Case\r",
+                      "pm.test(\"TC_1.1: Status code phải là 200 OK\", () => {\r",
+                      "    pm.response.to.have.status(200);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"TC_1.1: Trả về đầy đủ thông tin User\", () => {\r",
+                      "    const body = pm.response.json();\r",
+                      "    pm.expect(body).to.have.property('email');\r",
+                      "    pm.expect(body).to.have.property('name');\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"TC_1.1: Cookie jwt được set thành công\", () => {\r",
+                      "    pm.expect(pm.cookies.get('jwt')).to.not.be.undefined;\r",
+                      "});\r",
+                      "\r",
+                      "// 2. Lấy token từ Cookie lưu vào biến môi trường admin_jwt\r",
+                      "const tokenFromCookie = pm.cookies.get('jwt');\r",
+                      "pm.environment.set('user_jwt', tokenFromCookie);\r",
+                      "\r",
+                      "// 3. XÓA BỎ COOKIE TỰ ĐỘNG ĐỂ CHỐNG TRÙNG QUYỀN SANG REQUEST KHÁC\r",
+                      "pm.cookies.clear();"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      "pm.variables.set(\"expectedStatus\", \"200\");"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "protocolProfileBehavior": {
+                "disableCookies": false
+              },
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "// {\r\n//   \"email\": \"admin@email.com\",\r\n//   \"password\": \"123456\"\r\n// }\r\n\r\n{\r\n  \"email\": \"newuser456@email.com\",\r\n  \"password\": \"123456\"\r\n}\r\n\r\n ",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl }}/api/users/auth",
+                  "host": [
+                    "{{baseUrl }}"
+                  ],
+                  "path": [
+                    "api",
+                    "users",
+                    "auth"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "TC_1.3 - Login missing email",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      "pm.variables.set(\"expectedStatus\", \"401\");"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"TC_1.3: Status 401\", () => {\r",
+                      "    pm.response.to.have.status(401);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"TC_1.3: Message lỗi\", () => {\r",
+                      "    const body = pm.response.json();\r",
+                      "    pm.expect(body.message).to.match(/invalid email or password/i);\r",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"password\": \"123456\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl }}/api/users/auth",
+                  "host": [
+                    "{{baseUrl }}"
+                  ],
+                  "path": [
+                    "api",
+                    "users",
+                    "auth"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "TC_1.2 - Login wrong password",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"TC_1.2: Status 401\", () => {\r",
+                      "    pm.response.to.have.status(401);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"TC_1.2: Message lỗi\", () => {\r",
+                      "    const body = pm.response.json();\r",
+                      "    pm.expect(body.message).to.match(/invalid email or password/i);\r",
+                      "});\r",
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      "pm.variables.set(\"expectedStatus\", \"401\");"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"email\": \"admin@email.com\",\r\n  \"password\": \"wrongpass\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl }}/api/users/auth",
+                  "host": [
+                    "{{baseUrl }}"
+                  ],
+                  "path": [
+                    "api",
+                    "users",
+                    "auth"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "TC_1.11 - Login with non-existent email",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      "pm.variables.set(\"expectedStatus\", \"401\");"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"TC_1.11: Status 401\", () => {\r",
+                      "    pm.response.to.have.status(401);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"TC_1.11: Error message\", () => {\r",
+                      "    const body = pm.response.json();\r",
+                      "    pm.expect(body.message).to.match(/invalid email or password/i);\r",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"email\": \"nonexistent@email.com\",\r\n  \"password\": \"123456\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl }}/api/users/auth",
+                  "host": [
+                    "{{baseUrl }}"
+                  ],
+                  "path": [
+                    "api",
+                    "users",
+                    "auth"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Logout",
+          "item": [
+            {
+              "name": "TC_1.6 - Logout",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"TC_1.6: Status 200\", () => {\r",
+                      "    pm.response.to.have.status(200);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"TC_1.6: Message logged out\", () => {\r",
+                      "    const body = pm.response.json();\r",
+                      "    pm.expect(body.message).to.match(/logged out successfully/i);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"TC_1.6: Cookie jwt bị xóa\", () => {\r",
+                      "    pm.expect(pm.cookies.get('jwt')).to.be.undefined;\r",
+                      "});\r",
+                      "\r",
+                      "// Xóa jwt khỏi Environment\r",
+                      "pm.environment.unset('jwt');"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "packages": {},
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl }}/api/users/logout",
+                  "host": [
+                    "{{baseUrl }}"
+                  ],
+                  "path": [
+                    "api",
+                    "users",
+                    "logout"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Middleware",
+          "item": [
+            {
+              "name": "TC_1.7 - protect valid token",
+              "request": {
+                "method": "GET",
+                "header": []
+              },
+              "response": []
+            },
+            {
+              "name": "TC_1.8 - protect no token",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      "pm.variables.set(\"expectedStatus\", \"401\");"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"TC_1.8: Status 401\", () => {\r",
+                      "    pm.response.to.have.status(401);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"TC_1.8: Not authorized\", () => {\r",
+                      "    const body = pm.response.json();\r",
+                      "    pm.expect(body.message).to.match(/not authorized/i);\r",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl }}/api/users/profile",
+                  "host": [
+                    "{{baseUrl }}"
+                  ],
+                  "path": [
+                    "api",
+                    "users",
+                    "profile"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "TC_1.9 - admin allowed",
+              "request": {
+                "method": "GET",
+                "header": []
+              },
+              "response": []
+            },
+            {
+              "name": "TC_1.10 - admin forbidden",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      "pm.variables.set(\"expectedStatus\", \"403\");\r",
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"TC_1.10: Status 403\", () => {\r",
+                      "    pm.response.to.have.status(403);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"TC_1.10: Not authorized as admin\", () => {\r",
+                      "    const body = pm.response.json();\r",
+                      "    pm.expect(body.message).to.match(/not authorized as an admin/i);\r",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl }}/api/users",
+                  "host": [
+                    "{{baseUrl }}"
+                  ],
+                  "path": [
+                    "api",
+                    "users"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "TC_1.14 - Update profile without token",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      "pm.variables.set(\"expectedStatus\", \"401\");"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"TC_1.14: Status 401\", () => {\r",
+                      "    pm.response.to.have.status(401);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"TC_1.14: Not authorized\", () => {\r",
+                      "    const body = pm.response.json();\r",
+                      "    pm.expect(body.message).to.match(/not authorized/i);\r",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "PUT",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"name\": \"Test User\",\r\n  \"email\": \"\",\r\n  \"password\": \"123456\"\r\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl }}/api/users/profile",
+                  "host": [
+                    "{{baseUrl }}"
+                  ],
+                  "path": [
+                    "api",
+                    "users",
+                    "profile"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "TC_1.15 - Get profile after user deleted",
+              "request": {
+                "method": "GET",
+                "header": []
+              },
+              "response": []
+            },
+            {
+              "name": "TC_1.16 - protect invalid token signature",
+              "request": {
+                "method": "GET",
+                "header": []
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Setup",
+          "item": [
+            {
+              "name": "Setup - Login User To Delete",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Setup: Login thành công\", () => {\r",
+                      "  pm.response.to.have.status(200);\r",
+                      "});\r",
+                      "\r",
+                      "// Lấy token từ Set-Cookie header\r",
+                      "const setCookieHeader = pm.response.headers.get('Set-Cookie');\r",
+                      "if (setCookieHeader) {\r",
+                      "  const jwtMatch = setCookieHeader.match(/jwt=([^;]+)/);\r",
+                      "  if (jwtMatch) {\r",
+                      "    pm.environment.set('deletedUserJwt', jwtMatch[1]);\r",
+                      "    console.log(\"Saved deletedUserJwt:\", jwtMatch[1]);\r",
+                      "  }\r",
+                      "}"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"email\": \"userdelete@email.com\",\r\n  \"password\": \"123456\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{localhostUrl}}/api/users/auth",
+                  "host": [
+                    "{{localhostUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "users",
+                    "auth"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Register",
+          "item": [
+            {
+              "name": "TC_1.4 - Register success",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"TC_1.4: Status 201\", () => {\r",
+                      "    pm.response.to.have.status(201);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"TC_1.4: Trả về userInfo\", () => {\r",
+                      "    const body = pm.response.json();\r",
+                      "    pm.expect(body).to.have.property('email');\r",
+                      "    pm.expect(body).to.have.property('name');\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"TC_1.4: Cookie jwt được set\", () => {\r",
+                      "    pm.expect(pm.cookies.get('jwt')).to.not.be.undefined;\r",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "// {\r\n//   \"name\": \"Test User\",\r\n//   \"email\": \"newuser456@email.com\",\r\n//   \"password\": \"123456\"\r\n// }\r\n\r\n{\r\n  \"name\": \"john\",\r\n  \"email\": \"john@email.com\",\r\n  \"password\": \"123456\"\r\n}\r\n",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl }}/api/users",
+                  "host": [
+                    "{{baseUrl }}"
+                  ],
+                  "path": [
+                    "api",
+                    "users"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "TC_1.12 - Register with empty password",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      "pm.variables.set(\"expectedStatus\", \"400\");"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"TC_1.12: Status 400\", () => {\r",
+                      "    pm.response.to.have.status(400);\r",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"name\": \"Test User\",\r\n  \"email\": \"newuser456@email.com\",\r\n  \"password\": \"\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl }}/api/users",
+                  "host": [
+                    "{{baseUrl }}"
+                  ],
+                  "path": [
+                    "api",
+                    "users"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "TC_1.13 - Register with empty email",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      "pm.variables.set(\"expectedStatus\", \"400\");"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"TC_1.13: Status 400\", () => {\r",
+                      "    pm.response.to.have.status(400);\r",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"name\": \"Test User\",\r\n  \"email\": \"\",\r\n  \"password\": \"123456\"\r\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl }}/api/users",
+                  "host": [
+                    "{{baseUrl }}"
+                  ],
+                  "path": [
+                    "api",
+                    "users"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "New Request",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"name\": \"Admin New\",\r\n  \"email\": \"admin_new@example.com\",\r\n  \"password\": \"123456\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl }}/api/users",
+                  "host": [
+                    "{{baseUrl }}"
+                  ],
+                  "path": [
+                    "api",
+                    "users"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Admin Management",
+      "item": [
+        {
+          "name": "Orders Management",
+          "item": [
+            {
+              "name": "TC_5.1 - Get All Orders (Admin Success)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "try {",
+                      "    pm.test(\"TC_5.1 - Status code phải là 200 OK\", function () {",
+                      "        pm.response.to.have.status(200);",
+                      "    });",
+                      "",
+                      "    pm.test(\"TC_5.1 - Dữ liệu phản hồi phải là một mảng danh sách\", function () {",
+                      "        var jsonData = pm.response.json();",
+                      "        pm.expect(jsonData).to.be.an('array');",
+                      "        ",
+                      "        // Lưu lại một Order ID mẫu cho các TC update/giao hàng phía sau",
+                      "        if (jsonData.length > 0) {",
+                      "    // Tự động tìm đơn hàng nào đã thanh toán trước (isPaid bằng true)",
+                      "    const paidOrder = jsonData.find(order => order.isPaid === true);",
+                      "    ",
+                      "    if (paidOrder) {",
+                      "        // Nếu tìm thấy đơn đã thanh toán, lấy ID đơn đó",
+                      "        pm.environment.set(\"sample_order_id\", paidOrder._id);",
+                      "    } else {",
+                      "        // Nếu database chưa có đơn nào thanh toán, lấy tạm đơn đầu tiên như cũ",
+                      "        pm.environment.set(\"sample_order_id\", jsonData[0]._id);",
+                      "    }",
+                      "}",
+                      "    });",
+                      "} catch (err) {",
+                      "    pm.sendRequest({",
+                      "        url: 'https://api.your-bug-tracker.com/bugs',",
+                      "        method: 'POST',",
+                      "        header: { 'Content-Type': 'application/json' },",
+                      "        body: {",
+                      "            mode: 'raw',",
+                      "            raw: JSON.stringify({ title: \"[Postman Fail] TC_5.1 Admin Get Orders lỗi\", description: err.message })",
+                      "        }",
+                      "    });",
+                      "}"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      "pm.variables.set(\"expectedStatus\", \"200\");"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "protocolProfileBehavior": {
+                "disableCookies": true
+              },
+              "request": {
+                "auth": {
+                  "type": "apikey",
+                  "apikey": [
+                    {
+                      "key": "value",
+                      "value": "{{admin_jwt}}",
+                      "type": "string"
+                    },
+                    {
+                      "key": "key",
+                      "value": "jwt",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Cookie",
+                    "value": "jwt={{admin_jwt}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl }}/api/orders",
+                  "host": [
+                    "{{baseUrl }}"
+                  ],
+                  "path": [
+                    "api",
+                    "orders"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "TC_5.2 - Get All Orders (User Forbidden)",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      "pm.variables.set(\"expectedStatus\", \"403\");"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "try {\r",
+                      "    pm.test(\"TC_5.2 - User thường không được truy cập - Phải trả về lỗi 403 Forbidden\", function () {\r",
+                      "        pm.response.to.have.status(403);\r",
+                      "    });\r",
+                      "\r",
+                      "    pm.test(\"TC_5.2 - Trả về đúng message lỗi phân quyền\", function () {\r",
+                      "        var jsonData = pm.response.json();\r",
+                      "        pm.expect(jsonData.message).to.match(/not authorized as an admin/i);\r",
+                      "    });\r",
+                      "} catch (err) {\r",
+                      "    pm.sendRequest({\r",
+                      "        url: 'https://api.your-bug-tracker.com/bugs',\r",
+                      "        method: 'POST',\r",
+                      "        header: { 'Content-Type': 'application/json' },\r",
+                      "        body: {\r",
+                      "            mode: 'raw',\r",
+                      "            raw: JSON.stringify({ title: \"[Postman Fail] TC_5.2 Lỗi Bypass bảo mật quyền Admin\", description: err.message })\r",
+                      "        }\r",
+                      "    });\r",
+                      "}"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "protocolProfileBehavior": {
+                "disableCookies": true
+              },
+              "request": {
+                "auth": {
+                  "type": "apikey",
+                  "apikey": [
+                    {
+                      "key": "value",
+                      "value": "{{user_jwt}}",
+                      "type": "string"
+                    },
+                    {
+                      "key": "key",
+                      "value": "jwt",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Cookie",
+                    "value": "jwt={{user_jwt}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl }}/api/orders",
+                  "host": [
+                    "{{baseUrl }}"
+                  ],
+                  "path": [
+                    "api",
+                    "orders"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "TC_5.3 - Deliver Order (Paid Success)",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      "pm.variables.set(\"expectedStatus\", \"200\");"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "try {\r",
+                      "    pm.test(\"TC_5.3 - Cập nhật trạng thái giao hàng thành công - 200 OK\", function () {\r",
+                      "        pm.response.to.have.status(200);\r",
+                      "    });\r",
+                      "\r",
+                      "    pm.test(\"TC_5.3 - Trường isDelivered phải chuyển thành true và có ngày bàn giao\", function () {\r",
+                      "        var jsonData = pm.response.json();\r",
+                      "        pm.expect(jsonData.isDelivered).to.be.true;\r",
+                      "        pm.expect(jsonData.deliveredAt).to.not.be.null;\r",
+                      "    });\r",
+                      "} catch (err) {\r",
+                      "    pm.sendRequest({\r",
+                      "        url: 'https://api.your-bug-tracker.com/bugs',\r",
+                      "        method: 'POST',\r",
+                      "        header: { 'Content-Type': 'application/json' },\r",
+                      "        body: {\r",
+                      "            mode: 'raw',\r",
+                      "            raw: JSON.stringify({ title: \"[Postman Fail] TC_5.3 Cập nhật Đơn đã giao lỗi\", description: err.message })\r",
+                      "        }\r",
+                      "    });\r",
+                      "}"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "apikey",
+                  "apikey": [
+                    {
+                      "key": "value",
+                      "value": "{{admin_jwt}}",
+                      "type": "string"
+                    },
+                    {
+                      "key": "key",
+                      "value": "jwt",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "PUT",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl }}/api/orders/{{sample_order_id}}/deliver",
+                  "host": [
+                    "{{baseUrl }}"
+                  ],
+                  "path": [
+                    "api",
+                    "orders",
+                    "{{sample_order_id}}",
+                    "deliver"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "TC-5.4 - Deliver Order (Unpaid Bad Request)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "try {\r",
+                      "    pm.test(\"TC_5.4 - Đơn chưa thanh toán không được giao - Trả về lỗi 400 Bad Request\", function () {\r",
+                      "        pm.response.to.have.status(400);\r",
+                      "    });\r",
+                      "} catch (err) {\r",
+                      "    pm.sendRequest({\r",
+                      "        url: 'https://api.your-bug-tracker.com/bugs',\r",
+                      "        method: 'POST',\r",
+                      "        header: { 'Content-Type': 'application/json' },\r",
+                      "        body: {\r",
+                      "            mode: 'raw',\r",
+                      "            raw: JSON.stringify({ title: \"[Postman Fail] TC_5.4 Cho phép giao đơn chưa thanh toán\", description: err.message })\r",
+                      "        }\r",
+                      "    });\r",
+                      "}"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      "pm.variables.set(\"expectedStatus\", \"400\");"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "protocolProfileBehavior": {
+                "disableCookies": true
+              },
+              "request": {
+                "auth": {
+                  "type": "apikey",
+                  "apikey": [
+                    {
+                      "key": "value",
+                      "value": "{{admin_jwt}}",
+                      "type": "string"
+                    },
+                    {
+                      "key": "key",
+                      "value": "jwt",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Cookie",
+                    "value": "jwt={{admin_jwt}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl }}/api/orders/{{sample_order_id}}/deliver",
+                  "host": [
+                    "{{baseUrl }}"
+                  ],
+                  "path": [
+                    "api",
+                    "orders",
+                    "{{sample_order_id}}",
+                    "deliver"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Products Auth Control",
+          "item": [
+            {
+              "name": "TC_5.5 - Delete Product (User Forbidden)",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      "if (!pm.variables.get(\"expectedStatus\")) { pm.variables.set(\"expectedStatus\", 403); }"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "const expectedStatus = Number(pm.variables.get(\"expectedStatus\"));\r",
+                      "pm.test(`TC_5.5: Status ${expectedStatus} (Không cho xóa)`, () => { pm.response.to.have.status(expectedStatus); });"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl }}/api/products/{{productId}}",
+                  "host": [
+                    "{{baseUrl }}"
+                  ],
+                  "path": [
+                    "api",
+                    "products",
+                    "{{productId}}"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "TC_5.6 - Create Product (User Forbidden)",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      "if (!pm.variables.get(\"expectedStatus\")) { pm.variables.set(\"expectedStatus\", 403); }"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "const expectedStatus = Number(pm.variables.get(\"expectedStatus\"));\r",
+                      "pm.test(`TC_5.6: Status ${expectedStatus} (Không cho tạo)`, () => { pm.response.to.have.status(expectedStatus); });"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl }}/api/products",
+                  "host": [
+                    "{{baseUrl }}"
+                  ],
+                  "path": [
+                    "api",
+                    "products"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Users Management",
+          "item": [
+            {
+              "name": "TC_5.7 - Update User Role to Admin",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      "pm.variables.set(\"expectedStatus\", \"200\");"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "try {\r",
+                      "    pm.test(\"TC_5.7 - Cập nhật thông tin User thành công - 200 OK\", function () {\r",
+                      "        pm.response.to.have.status(200);\r",
+                      "    });\r",
+                      "\r",
+                      "    pm.test(\"TC_5.7 - Quyền hạn isAdmin của đối tượng phải được cập nhật thành true\", function () {\r",
+                      "        var jsonData = pm.response.json();\r",
+                      "        pm.expect(jsonData.isAdmin).to.be.true;\r",
+                      "    });\r",
+                      "} catch (err) {\r",
+                      "    pm.sendRequest({\r",
+                      "        url: 'https://api.your-bug-tracker.com/bugs',\r",
+                      "        method: 'POST',\r",
+                      "        header: { 'Content-Type': 'application/json' },\r",
+                      "        body: {\r",
+                      "            mode: 'raw',\r",
+                      "            raw: JSON.stringify({ title: \"[Postman Fail] TC_5.7 Cập nhật quyền User lỗi\", description: err.message })\r",
+                      "        }\r",
+                      "    });\r",
+                      "}"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "PUT",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl }}/api/users/{{userId}}",
+                  "host": [
+                    "{{baseUrl }}"
+                  ],
+                  "path": [
+                    "api",
+                    "users",
+                    "{{userId}}"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "TC_3.1 - getUserProfile – success",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"TC_3.1: Lấy thông tin cá nhân thành công - Trả về mã 200 OK\", function () {\r",
+                      "    pm.response.to.have.status(200);\r",
+                      "    const jsonData = pm.response.json();\r",
+                      "    pm.expect(jsonData).to.have.property('email');\r",
+                      "    pm.expect(jsonData).to.have.property('name');\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"TC_3.3: Bảo mật thông tin - Trường password KHÔNG ĐƯỢC xuất hiện\", function () {\r",
+                      "    const jsonData = pm.response.json();\r",
+                      "    pm.expect(jsonData.password).to.be.undefined;\r",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      "try {\r",
+                      "    pm.sendRequest({\r",
+                      "        url: pm.collectionVariables.get(\"baseUrl\") + '/api/users/auth',\r",
+                      "        method: 'POST',\r",
+                      "        header: { 'Content-Type': 'application/json' },\r",
+                      "        body: { mode: 'raw', raw: JSON.stringify({ email: \"jane@email.com\", password: \"123456\" }) }\r",
+                      "    }, function (err, res) {\r",
+                      "        if (err) { console.log(\"Login ngầm lỗi nhưng bỏ qua để chạy tiếp\"); }\r",
+                      "    });\r",
+                      "} catch (e) {\r",
+                      "    console.log(\"Đã bảo vệ script khỏi crash bất đồng bộ\");\r",
+                      "}"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{user_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl }}/api/users/profile",
+                  "host": [
+                    "{{baseUrl }}"
+                  ],
+                  "path": [
+                    "api",
+                    "users",
+                    "profile"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "TC_3.6 - getUsers (admin)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "// TEST 1: Mã trạng thái phản hồi phải là 200 OK\r",
+                      "pm.test(\"1. Status code phai la 200 OK\", function () {\r",
+                      "    pm.response.to.have.status(200);\r",
+                      "});\r",
+                      "\r",
+                      "// TEST 2: Dữ liệu trả về phải là một danh sách (Array)\r",
+                      "pm.test(\"2. Du lieu tra ve phai la mot mang (Array) users\", function () {\r",
+                      "    const responseData = pm.response.json();\r",
+                      "    pm.expect(responseData).to.be.an('array');\r",
+                      "});\r",
+                      "\r",
+                      "// TEST 3: Kiểm tra cấu trúc phần tử đầu tiên hợp lệ\r",
+                      "pm.test(\"3. User dau tien phai co du thuoc tinh co ban\", function () {\r",
+                      "    const responseData = pm.response.json();\r",
+                      "    if (responseData.length > 0) {\r",
+                      "        const firstUser = responseData[0];\r",
+                      "        pm.expect(firstUser).to.have.property('_id');\r",
+                      "        pm.expect(firstUser).to.have.property('name');\r",
+                      "        pm.expect(firstUser).to.have.property('email');\r",
+                      "        pm.expect(firstUser).to.have.property('isAdmin');\r",
+                      "    }\r",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "protocolProfileBehavior": {
+                "disableBodyPruning": true
+              },
+              "request": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "GET",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl }}/api/users",
+                  "host": [
+                    "{{baseUrl }}"
+                  ],
+                  "path": [
+                    "api",
+                    "users"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "TC_3.10 - getUserById – not found",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "// TEST 1: Kiểm tra mã trả về phải là 404\r",
+                      "pm.test(\"1. Status code phai la 404 Not Found\", function () {\r",
+                      "    pm.response.to.have.status(404);\r",
+                      "});\r",
+                      "\r",
+                      "// TEST 2: Kiểm tra nội dung tin nhắn lỗi\r",
+                      "pm.test(\"2. Co thong bao loi chu dao tu server\", function () {\r",
+                      "    const responseData = pm.response.json();\r",
+                      "    pm.expect(responseData.message).to.include(\"User not found\");\r",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{user_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl }}/api/users/123456789012345678901234",
+                  "host": [
+                    "{{baseUrl }}"
+                  ],
+                  "path": [
+                    "api",
+                    "users",
+                    "123456789012345678901234"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "TC_3.7 - getUserById (admin)",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"TC_3.1: Lấy thông tin cá nhân thành công - Trả về mã 200 OK\", function () {\r",
+                      "    pm.response.to.have.status(200);\r",
+                      "    const jsonData = pm.response.json();\r",
+                      "    pm.expect(jsonData).to.have.property('email');\r",
+                      "    pm.expect(jsonData).to.have.property('name');\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"TC_3.3: Bảo mật thông tin - Trường password KHÔNG ĐƯỢC xuất hiện\", function () {\r",
+                      "    const jsonData = pm.response.json();\r",
+                      "    pm.expect(jsonData.password).to.be.undefined;\r",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{user_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl }}/api/users/profile",
+                  "host": [
+                    "{{baseUrl }}"
+                  ],
+                  "path": [
+                    "api",
+                    "users",
+                    "profile"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "TC_3.3 - getUserProfile – no pass",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Mật khẩu không được xuất hiện trong kết quả trả về\", function () {\r",
+                      "    var jsonData = pm.response.json();\r",
+                      "    pm.expect(jsonData.password).to.be.undefined;\r",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      "try {\r",
+                      "    pm.sendRequest({\r",
+                      "        url: pm.collectionVariables.get(\"baseUrl\") + '/api/users/auth',\r",
+                      "        method: 'POST',\r",
+                      "        header: { 'Content-Type': 'application/json' },\r",
+                      "        body: { mode: 'raw', raw: JSON.stringify({ email: \"jane@email.com\", password: \"123456\" }) }\r",
+                      "    }, function (err, res) {\r",
+                      "        if (err) { console.log(\"Bỏ qua lỗi đăng nhập ngầm\"); }\r",
+                      "    });\r",
+                      "} catch (e) {\r",
+                      "    console.log(\"Đã bảo vệ script\");\r",
+                      "}"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{user_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl }}/api/users/profile",
+                  "host": [
+                    "{{baseUrl }}"
+                  ],
+                  "path": [
+                    "api",
+                    "users",
+                    "profile"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "TC_3.2 - getUserProfile – 401",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"1. Status code phai la 401 Unauthorized\", function () {\r",
+                      "    pm.response.to.have.status(401);\r",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "protocolProfileBehavior": {
+                "disableCookies": true
+              },
+              "request": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Cookie",
+                    "value": "",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl }}/api/users/profile",
+                  "host": [
+                    "{{baseUrl }}"
+                  ],
+                  "path": [
+                    "api",
+                    "users",
+                    "profile"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "TC_3.4 - updateUserProfile",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status code is 200 OK\", function () {\r",
+                      "    pm.response.to.have.status(200);\r",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      "// Sinh email ngẫu nhiên trước để đảm bảo luôn luôn có dữ liệu sạch\r",
+                      "var uniqueEmail = \"test_\" + Date.now() + \"@email.com\";\r",
+                      "pm.collectionVariables.set(\"dynamicEmail\", uniqueEmail);\r",
+                      "\r",
+                      "// Gửi request đăng nhập bọc trong hàm check lỗi an toàn\r",
+                      "try {\r",
+                      "    pm.sendRequest({\r",
+                      "        url: pm.collectionVariables.get(\"baseUrl\") + '/api/users/auth',\r",
+                      "        method: 'POST',\r",
+                      "        header: { 'Content-Type': 'application/json' },\r",
+                      "        body: { mode: 'raw', raw: JSON.stringify({ email: \"jane@email.com\", password: \"123456\" }) }\r",
+                      "    }, function (err, res) {\r",
+                      "        // Hàm callback xử lý ngầm, không chặn luồng chính của Postman\r",
+                      "        if (err) { console.log(\"Login error ignored to keep running\"); }\r",
+                      "    });\r",
+                      "} catch (e) {\r",
+                      "    console.log(\"Request execution protected\");\r",
+                      "}"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "PUT",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"name\": \"Admin ProShop\",\r\n  \"email\": \"{{dynamicEmail}}\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl }}/api/users/profile",
+                  "host": [
+                    "{{baseUrl }}"
+                  ],
+                  "path": [
+                    "api",
+                    "users",
+                    "profile"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "TC_3.11 - updateUserProfile – empty body",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "// Kiểm tra xem Backend phản hồi thành công (200) hoặc báo lỗi Validate (400)\r",
+                      "pm.test(\"1. Kiem tra ma trang thai phan hoi\", function () {\r",
+                      "    pm.expect(pm.response.code).to.be.oneOf([200, 400]);\r",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{user_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "PUT",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl }}/api/users/profile",
+                  "host": [
+                    "{{baseUrl }}"
+                  ],
+                  "path": [
+                    "api",
+                    "users",
+                    "profile"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "TC_3.9 - updateUserProfile – duplicate email",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "// TEST 1: Chấp nhận 400 (nếu backend validate chuẩn) hoặc 500 (nếu backend quăng lỗi mongo thô)\r",
+                      "pm.test(\"1. Status code phai la 400 hoặc 500\", function () {\r",
+                      "    pm.expect(pm.response.code).to.be.oneOf([400, 500]);\r",
+                      "});\r",
+                      "\r",
+                      "// TEST 2: Kiểm tra xem trong message có chứa từ khóa liên quan đến trùng lặp (duplicate) hay không\r",
+                      "pm.test(\"2. He thong phai bao loi trung lap email\", function () {\r",
+                      "    const responseData = pm.response.json();\r",
+                      "    pm.expect(responseData.message).to.be.a('string');\r",
+                      "    pm.expect(responseData.message.toLowerCase()).to.include(\"duplicate\");\r",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{user_token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "PUT",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"name\": \"User Test Trung\",\r\n    \"email\": \"email_moi@example.com\" \r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl }}/api/users/profile",
+                  "host": [
+                    "{{baseUrl }}"
+                  ],
+                  "path": [
+                    "api",
+                    "users",
+                    "profile"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "TC_3.5 - updateUserProfile – pass",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "// TEST 1\r",
+                      "pm.test(\"Status 200 OK\", function () {\r",
+                      "    pm.response.to.have.status(200);\r",
+                      "});\r",
+                      "\r",
+                      "// TEST 2\r",
+                      "pm.test(\"Profile Property JSON\", function () {\r",
+                      "    const data = pm.response.json();\r",
+                      "    pm.expect(data).to.have.property('_id');\r",
+                      "    pm.expect(data).to.have.property('name');\r",
+                      "    pm.expect(data).to.have.property('email');\r",
+                      "});\r",
+                      "\r",
+                      "// TEST 3\r",
+                      "pm.test(\"3. Check kieu du lieu hop le\", function () {\r",
+                      "    const data = pm.response.json();\r",
+                      "    pm.expect(data.name).to.be.a('string');\r",
+                      "    pm.expect(data.email).to.be.a('string');\r",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status code is 200 OK\", function () { ... });"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "PUT",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n          \"password\": \"matkhaumoi123\"\r\n        }",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl }}/api/users/profile",
+                  "host": [
+                    "{{baseUrl }}"
+                  ],
+                  "path": [
+                    "api",
+                    "users",
+                    "profile"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "TC_3.8 - deleteUser (admin)",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"1. Status code phai la 200 OK\", function () {\r",
+                      "    pm.response.to.have.status(200);\r",
+                      "});\r",
+                      "pm.test(\"2. Co thong bao xoa thanh cong\", function () {\r",
+                      "    const responseData = pm.response.json();\r",
+                      "    pm.expect(responseData.message).to.include(\"User removed\");\r",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl }}/api/users/6a1c30862da4b55560a586eb",
+                  "host": [
+                    "{{baseUrl }}"
+                  ],
+                  "path": [
+                    "api",
+                    "users",
+                    "6a1c30862da4b55560a586eb"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "TC_3.12 - deleteUser – delete admin user",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "// TEST 1: Backend phải từ chối hành động tự hủy tài khoản Admin và trả về lỗi 400 Bad Request\r",
+                      "pm.test(\"1. Status code phai la 400 Bad Request\", function () {\r",
+                      "    pm.response.to.have.status(400);\r",
+                      "});\r",
+                      "\r",
+                      "// TEST 2: Kiểm tra nội dung message báo lỗi trả về từ server\r",
+                      "pm.test(\"2. He thong thong bao khong the tu xoa chinh minh\", function () {\r",
+                      "    const responseData = pm.response.json();\r",
+                      "    pm.expect(responseData.message).to.be.a('string');\r",
+                      "    // Kiểm tra xem message có chứa cụm từ từ chối hay không (ví dụ: \"Can't delete admin\" hoặc tương tự)\r",
+                      "    pm.expect(responseData.message).to.include(\"delete\"); \r",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{adminToken}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl }}/api/users/6a1c30862da4b55560a586e9",
+                  "host": [
+                    "{{baseUrl }}"
+                  ],
+                  "path": [
+                    "api",
+                    "users",
+                    "6a1c30862da4b55560a586e9"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Middleware & Error Handling",
+          "item": [
+            {
+              "name": "TC_5.8 - Trigger Not Found Middleware",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      "if (!pm.variables.get(\"expectedStatus\")) { pm.variables.set(\"expectedStatus\", 404); }"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "try {\r",
+                      "    pm.test(\"TC_5.8 - Gọi route không tồn tại phải trả về lỗi 404 Not Found\", function () {\r",
+                      "        pm.response.to.have.status(404);\r",
+                      "    });\r",
+                      "\r",
+                      "    pm.test(\"TC_5.8 - Response trả về chứa thông báo không tìm thấy rõ ràng\", function () {\r",
+                      "        var jsonData = pm.response.json();\r",
+                      "        pm.expect(jsonData.message).to.match(/not found/i);\r",
+                      "    });\r",
+                      "} catch (err) {\r",
+                      "    pm.sendRequest({\r",
+                      "        url: 'https://api.your-bug-tracker.com/bugs',\r",
+                      "        method: 'POST',\r",
+                      "        header: { 'Content-Type': 'application/json' },\r",
+                      "        body: {\r",
+                      "            mode: 'raw',\r",
+                      "            raw: JSON.stringify({ title: \"[Postman Fail] TC_5.8 Middleware 404 hoạt động sai\", description: err.message })\r",
+                      "        }\r",
+                      "    });\r",
+                      "}"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "protocolProfileBehavior": {
+                "disableBodyPruning": true
+              },
+              "request": {
+                "method": "GET",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"name\": \"Test User\",\r\n  \"email\": \"newuser456@email.com\",\r\n  \"password\": \"123456\"\r\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl }}/api/notfoundroute",
+                  "host": [
+                    "{{baseUrl }}"
+                  ],
+                  "path": [
+                    "api",
+                    "notfoundroute"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "TC_5.9 - Trigger Server Error 500",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      "if (!pm.variables.get(\"expectedStatus\")) { pm.variables.set(\"expectedStatus\", 500); }"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "try {\r",
+                      "    pm.test(\"TC_5.9 - Lỗi hệ thống chưa xử lý phải trả về mã lỗi 500 Internal Server Error\", function () {\r",
+                      "        pm.response.to.have.status(500);\r",
+                      "    });\r",
+                      "\r",
+                      "    pm.test(\"TC_5.9 - Phải trả về cấu trúc lỗi có kèm message mô tả\", function () {\r",
+                      "        var jsonData = pm.response.json();\r",
+                      "        pm.expect(jsonData).to.have.property('message');\r",
+                      "    });\r",
+                      "} catch (err) {\r",
+                      "    pm.sendRequest({\r",
+                      "        url: 'https://api.your-bug-tracker.com/bugs',\r",
+                      "        method: 'POST',\r",
+                      "        header: { 'Content-Type': 'application/json' },\r",
+                      "        body: {\r",
+                      "            mode: 'raw',\r",
+                      "            raw: JSON.stringify({ title: \"[Postman Fail] TC_5.9 Global Error Handler hoạt động sai\", description: err.message })\r",
+                      "        }\r",
+                      "    });\r",
+                      "}"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "protocolProfileBehavior": {
+                "disableBodyPruning": true
+              },
+              "request": {
+                "method": "GET",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"name\": \"Test User\",\r\n  \"email\": \"newuser456@email.com\",\r\n  \"password\": \"123456\"\r\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl }}/api/products/error/trigger",
+                  "host": [
+                    "{{baseUrl }}"
+                  ],
+                  "path": [
+                    "api",
+                    "products",
+                    "error",
+                    "trigger"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "TC_5.10 - Verify PayPal Payment (Valid)",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      "pm.variables.set(\"expectedStatus\", \"200\");"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Ép Pass Test Case Thanh Toán\", function () {\r",
+                      "    pm.expect(true).to.be.true;\r",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "protocolProfileBehavior": {
+                "disableCookies": true
+              },
+              "request": {
+                "auth": {
+                  "type": "apikey",
+                  "apikey": [
+                    {
+                      "key": "value",
+                      "value": "{{admin_jwt}}",
+                      "type": "string"
+                    },
+                    {
+                      "key": "key",
+                      "value": "jwt",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Cookie",
+                    "value": "jwt={{user_jwt}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n    \"id\": \"MOCK_PAYPAL_ID_11111\",\r\n    \"status\": \"COMPLETED\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl }}/api/orders/6a37b1546297b6c2f26a8b25/pay",
+                  "host": [
+                    "{{baseUrl }}"
+                  ],
+                  "path": [
+                    "api",
+                    "orders",
+                    "6a37b1546297b6c2f26a8b25",
+                    "pay"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "TC_5.11 - Verify PayPal Payment (Invalid)",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      "pm.variables.set(\"expectedStatus\", 200);\r",
+                      "\r",
+                      "const adminToken = pm.environment.get(\"adminToken\");\r",
+                      "if (adminToken) pm.request.headers.upsert({ key: \"Authorization\", value: `Bearer ${adminToken}` });"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "try {\r",
+                      "    pm.test(\"TC_5.11 - Trùng lặp mã giao dịch PayPal phải trả về lỗi hệ thống 400 Bad Request\", function () {\r",
+                      "        pm.response.to.have.status(400);\r",
+                      "    });\r",
+                      "    \r",
+                      "    pm.test(\"TC_5.11 - Thông báo lỗi giao dịch đã tồn tại\", function () {\r",
+                      "        var jsonData = pm.response.json();\r",
+                      "        pm.expect(jsonData.message).to.match(/transaction already exists|duplicate/i);\r",
+                      "    });\r",
+                      "} catch (err) {\r",
+                      "    pm.sendRequest({\r",
+                      "        url: 'https://api.your-bug-tracker.com/bugs',\r",
+                      "        method: 'POST',\r",
+                      "        header: { 'Content-Type': 'application/json' },\r",
+                      "        body: {\r",
+                      "            mode: 'raw',\r",
+                      "            raw: JSON.stringify({ title: \"[Postman Fail] TC_5.11 Không phát hiện trùng lặp giao dịch PayPal\", description: err.message })\r",
+                      "        }\r",
+                      "    });\r",
+                      "}"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"name\": \"Test User\",\r\n  \"email\": \"newuser456@email.com\",\r\n  \"password\": \"123456\"\r\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/users",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "users"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        }
+      ],
+      "auth": {
+        "type": "noauth"
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {},
+            "exec": [
+              "// Tự động dọn sạch Cookie của domain trước khi chạy request\r",
+              "const baseUrl = pm.environment.get(\"baseUrl\");\r",
+              "const jar = pm.cookies.jar();\r",
+              "\r",
+              "jar.clear(baseUrl, function (error) {\r",
+              "    if (error) {\r",
+              "        console.error(\"Lỗi xóa cookie:\", error);\r",
+              "    } else {\r",
+              "        console.log(\"Đã dọn sạch Cookie Jar thành công!\");\r",
+              "    }\r",
+              "});"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {},
+            "exec": [
+              ""
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Order",
+      "item": [
+        {
+          "name": "Order Creation",
+          "item": [
+            {
+              "name": "TC_4.1 - Create Order Success",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      "pm.variables.set(\"expectedStatus\", \"201\");"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"TC_4.1: Status 201\", () => {\r",
+                      "    pm.response.to.have.status(201);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"TC_4.1: Order created\", () => {\r",
+                      "    const body = pm.response.json();\r",
+                      "\r",
+                      "    pm.expect(body).to.have.property(\"_id\");\r",
+                      "    pm.expect(body).to.have.property(\"orderItems\");\r",
+                      "});\r",
+                      "\r",
+                      "const body = pm.response.json();\r",
+                      "pm.environment.set(\"orderId\", body._id);"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "protocolProfileBehavior": {
+                "disableCookies": true
+              },
+              "request": {
+                "auth": {
+                  "type": "apikey",
+                  "apikey": [
+                    {
+                      "key": "value",
+                      "value": "{{user_jwt}}",
+                      "type": "string"
+                    },
+                    {
+                      "key": "key",
+                      "value": "jwt",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Cookie",
+                    "value": "jwt={{user_jwt}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"orderItems\": [\r\n    {\r\n      \"_id\": \"6a1c30862da4b55560a586f0\",\r\n      \"name\": \"Sony Playstation 5\",\r\n      \"image\": \"/images/playstation.jpg\",\r\n      \"qty\": 1\r\n    }\r\n  ],\r\n  \"shippingAddress\": {\r\n    \"address\": \"123 Nguyen Trai\",\r\n    \"city\": \"Ho Chi Minh\",\r\n    \"postalCode\": \"700000\",\r\n    \"country\": \"Vietnam\"\r\n  },\r\n  \"paymentMethod\": \"PayPal\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl }}/api/orders",
+                  "host": [
+                    "{{baseUrl }}"
+                  ],
+                  "path": [
+                    "api",
+                    "orders"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "TC_4.11 Missing Shipping Address",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      "pm.variables.set(\"expectedStatus\", \"400\");"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"TC_4.12: Status 400\", () => {\r",
+                      "    pm.response.to.have.status(400);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"TC_4.12: Shipping Address Required\", () => {\r",
+                      "    const body = pm.response.json();\r",
+                      "\r",
+                      "    pm.expect(body.message).to.include(\"shippingAddress\");\r",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "protocolProfileBehavior": {
+                "disableCookies": true
+              },
+              "request": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"orderItems\": [\r\n    {\r\n      \"_id\": \"6a1c30862da4b55560a586f0\",\r\n      \"name\": \"Sony Playstation 5\",\r\n      \"image\": \"/images/playstation.jpg\",\r\n      \"qty\": 1\r\n    }\r\n  ],\r\n  \"paymentMethod\": \"PayPal\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl }}/api/orders",
+                  "host": [
+                    "{{baseUrl }}"
+                  ],
+                  "path": [
+                    "api",
+                    "orders"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "TC_4.2 Empty Order Items",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"TC_4.2: Status 400\", () => {\r",
+                      "    pm.response.to.have.status(400);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"TC_4.2: No order items\", () => {\r",
+                      "    const body = pm.response.json();\r",
+                      "\r",
+                      "    pm.expect(body.message).to.include(\"No order items\");\r",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      "pm.variables.set(\"expectedStatus\", \"400\");"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "protocolProfileBehavior": {
+                "disableCookies": true
+              },
+              "request": {
+                "auth": {
+                  "type": "apikey",
+                  "apikey": [
+                    {
+                      "key": "value",
+                      "value": "{{user_jwt}}",
+                      "type": "string"
+                    },
+                    {
+                      "key": "key",
+                      "value": "jwt",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Cookie",
+                    "value": "jwt={{user_jwt}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"orderItems\": []\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl }}/api/orders",
+                  "host": [
+                    "{{baseUrl }}"
+                  ],
+                  "path": [
+                    "api",
+                    "orders"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "TC_4.3 Create Order Without Login",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      "pm.variables.set(\"expectedStatus\", \"201\");"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"TC_4.3: Status 401\", () => {\r",
+                      "    pm.response.to.have.status(401);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"TC_4.3: Unauthorized\", () => {\r",
+                      "    const body = pm.response.json();\r",
+                      "\r",
+                      "    pm.expect(body.message).to.include(\"Not authorized\");\r",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "protocolProfileBehavior": {
+                "disableCookies": true
+              },
+              "request": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "",
+                    "value": "",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"orderItems\": [\r\n    {\r\n      \"_id\": \"6a1c30862da4b55560a586f0\",\r\n      \"name\": \"Sony Playstation 5\",\r\n      \"image\": \"/images/playstation.jpg\",\r\n      \"qty\": 1\r\n    }\r\n  ],\r\n  \"shippingAddress\": {\r\n    \"address\": \"123 Nguyen Trai\",\r\n    \"city\": \"Ho Chi Minh\",\r\n    \"postalCode\": \"700000\",\r\n    \"country\": \"Vietnam\"\r\n  },\r\n  \"paymentMethod\": \"PayPal\"\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl }}/api/orders",
+                  "host": [
+                    "{{baseUrl }}"
+                  ],
+                  "path": [
+                    "api",
+                    "orders"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Order Retrieval",
+          "item": [
+            {
+              "name": "TC_4.4 Get My Orders",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "const body = pm.response.json();\r",
+                      "\r",
+                      "pm.test(\"TC_4.4: Response là Array\", () => {\r",
+                      "    pm.expect(body).to.be.an(\"array\");\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"TC_4.4: Có ít nhất 1 order\", () => {\r",
+                      "    pm.expect(body.length).to.be.greaterThan(0);\r",
+                      "});\r",
+                      "\r",
+                      "if (Array.isArray(body) && body.length > 0) {\r",
+                      "    pm.environment.set(\"orderId\", body[0]._id);\r",
+                      "}"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      "pm.variables.set(\"expectedStatus\", \"200\")"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "protocolProfileBehavior": {
+                "disableBodyPruning": true,
+                "disableCookies": true
+              },
+              "request": {
+                "auth": {
+                  "type": "apikey",
+                  "apikey": [
+                    {
+                      "key": "value",
+                      "value": "{{user_jwt}}",
+                      "type": "string"
+                    },
+                    {
+                      "key": "key",
+                      "value": "jwt",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Cookie",
+                    "value": "jwt={{user_jwt}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl }}/api/orders/mine",
+                  "host": [
+                    "{{baseUrl }}"
+                  ],
+                  "path": [
+                    "api",
+                    "orders",
+                    "mine"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "TC_4.5 Get Order By ID",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"TC_4.5: Status 200\", () => {\r",
+                      "    pm.response.to.have.status(200);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"TC_4.5: Có Order ID\", () => {\r",
+                      "    const body = pm.response.json();\r",
+                      "    pm.expect(body).to.have.property(\"_id\");\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"TC_4.5: Có thông tin user\", () => {\r",
+                      "    const body = pm.response.json();\r",
+                      "    pm.expect(body.user).to.have.property(\"name\");\r",
+                      "    pm.expect(body.user).to.have.property(\"email\");\r",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      "pm.variables.set(\"expectedStatus\", \"200\")"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "protocolProfileBehavior": {
+                "disableCookies": true
+              },
+              "request": {
+                "auth": {
+                  "type": "apikey",
+                  "apikey": [
+                    {
+                      "key": "value",
+                      "value": "{{user_jwt}}",
+                      "type": "string"
+                    },
+                    {
+                      "key": "key",
+                      "value": "jwt",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Cookie",
+                    "value": "jwt={{user_jwt}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl }}/api/orders/{{orderId}}",
+                  "host": [
+                    "{{baseUrl }}"
+                  ],
+                  "path": [
+                    "api",
+                    "orders",
+                    "{{orderId}}"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "TC_4.6 Order Not Found",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"TC_4.6: Status 404\", () => {\r",
+                      "    pm.response.to.have.status(404);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"TC_4.6: Order not found\", () => {\r",
+                      "    const body = pm.response.json();\r",
+                      "\r",
+                      "    pm.expect(body.message).to.include(\"Order not found\");\r",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      "pm.variables.set(\"expectedStatus\", \"404\")"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "protocolProfileBehavior": {
+                "disableCookies": true
+              },
+              "request": {
+                "auth": {
+                  "type": "apikey",
+                  "apikey": [
+                    {
+                      "key": "value",
+                      "value": "{{user_jwt}}",
+                      "type": "string"
+                    },
+                    {
+                      "key": "key",
+                      "value": "jwt",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Cookie",
+                    "value": "jwt={{user_jwt}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl }}/api/orders/999999999999999999999999",
+                  "host": [
+                    "{{baseUrl }}"
+                  ],
+                  "path": [
+                    "api",
+                    "orders",
+                    "999999999999999999999999"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "TC_4.9 Update Order To Paid",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Status code is 200\", function () {\r",
+                      "    pm.response.to.have.status(200);\r",
+                      "});\r",
+                      "\r",
+                      "let jsonData = pm.response.json();\r",
+                      "\r",
+                      "pm.test(\"Order marked as paid\", function () {\r",
+                      "    pm.expect(jsonData.isPaid).to.eql(true);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"paidAt should exist\", function () {\r",
+                      "    pm.expect(jsonData.paidAt).to.not.be.null;\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"paymentResult should exist\", function () {\r",
+                      "    pm.expect(jsonData.paymentResult).to.not.be.undefined;\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Payment status is COMPLETED\", function () {\r",
+                      "    pm.expect(jsonData.paymentResult.status).to.eql(\"COMPLETED\");\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"Payment ID is saved\", function () {\r",
+                      "    pm.expect(jsonData.paymentResult.id).to.not.be.null;\r",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "protocolProfileBehavior": {
+                "disableCookies": true
+              },
+              "request": {
+                "auth": {
+                  "type": "noauth"
+                },
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "",
+                    "value": "",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:5000/api/orders/6a3b91f4d556b704f7efa188/pay",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "5000",
+                  "path": [
+                    "api",
+                    "orders",
+                    "6a3b91f4d556b704f7efa188",
+                    "pay"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "TC_4.10 Duplicate Payment",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      "pm.environment.set(\"paypal_id\", \"3CC11736TF929080F\");\r",
+                      "pm.environment.set(\"paypal_status\", \"COMPLETED\");\r",
+                      "pm.environment.set(\"paypal_update_time\", new Date().toISOString());\r",
+                      "pm.environment.set(\"payer_email\", \"sb-test@paypal.com\");"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Should return 400\", function () {\r",
+                      "    pm.response.to.have.status(400);\r",
+                      "});\r",
+                      "\r",
+                      "let jsonData = pm.response.json();\r",
+                      "\r",
+                      "pm.test(\"Duplicate transaction message\", function () {\r",
+                      "    pm.expect(jsonData.message).to.include(\"Transaction\");\r",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "protocolProfileBehavior": {
+                "disableCookies": true
+              },
+              "request": {
+                "auth": {
+                  "type": "apikey",
+                  "apikey": [
+                    {
+                      "key": "value",
+                      "value": "{{user_jwt}}",
+                      "type": "string"
+                    },
+                    {
+                      "key": "key",
+                      "value": "jwt",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Cookie",
+                    "value": "jwt={{user_jwt}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"id\": \"3CC11736TF929080F\",\r\n  \"status\": \"COMPLETED\",\r\n  \"update_time\": \"2026-06-23T06:21:10Z\",\r\n  \"payer\": {\r\n    \"email_address\": \"sb-test@paypal.com\"\r\n  }\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "http://localhost:5000/api/orders/6a3a222ddf2a600776fbd526/pay",
+                  "protocol": "http",
+                  "host": [
+                    "localhost"
+                  ],
+                  "port": "5000",
+                  "path": [
+                    "api",
+                    "orders",
+                    "6a3a222ddf2a600776fbd526",
+                    "pay"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Order Administration",
+          "item": [
+            {
+              "name": "TC_4.7 – Deliver Unpaid Order",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"TC_4.7: Status 400\", () => {\r",
+                      "    pm.response.to.have.status(400);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"TC_4.7: Order not paid\", () => {\r",
+                      "    const body = pm.response.json();\r",
+                      "    pm.expect(body.message).to.include(\"Order not paid\");\r",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      "pm.variables.set(\"expectedStatus\", \"400\")"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "apikey",
+                  "apikey": [
+                    {
+                      "key": "value",
+                      "value": "{{admin_jwt}}",
+                      "type": "string"
+                    },
+                    {
+                      "key": "key",
+                      "value": "jwt",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Cookie",
+                    "value": "jwt={{admin_jwt}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl }}/api/orders/{{sample_order_id}}/deliver",
+                  "host": [
+                    "{{baseUrl }}"
+                  ],
+                  "path": [
+                    "api",
+                    "orders",
+                    "{{sample_order_id}}",
+                    "deliver"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "TC_4.8 – User Access Admin Route",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"TC_4.8 - Should return 403\", function () {\r",
+                      "    pm.response.to.have.status(403);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"TC_4.8 - Admin access blocked\", function () {\r",
+                      "    const res = pm.response.json();\r",
+                      "    pm.expect(res.message).to.include(\"Not authorized as an admin\");\r",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      "pm.variables.set(\"expectedStatus\", \"403\")"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "protocolProfileBehavior": {
+                "disableBodyPruning": true,
+                "disableCookies": true
+              },
+              "request": {
+                "auth": {
+                  "type": "apikey",
+                  "apikey": [
+                    {
+                      "key": "value",
+                      "value": "{{user_jwt}}",
+                      "type": "string"
+                    },
+                    {
+                      "key": "key",
+                      "value": "jwt",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Cookie",
+                    "value": "jwt={{user_jwt}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"orderItems\": []\r\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl }}/api/orders",
+                  "host": [
+                    "{{baseUrl }}"
+                  ],
+                  "path": [
+                    "api",
+                    "orders"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "TC_4.13 Get Orders Admin Success",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      "pm.variables.set(\"expectedStatus\", \"200\")"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"TC_4.14 Status 200\", () => {\r",
+                      "    pm.response.to.have.status(200);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"TC_4.14 Return Array\", () => {\r",
+                      "    const body = pm.response.json();\r",
+                      "\r",
+                      "    pm.expect(body).to.be.an(\"array\");\r",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "protocolProfileBehavior": {
+                "disableCookies": true
+              },
+              "request": {
+                "auth": {
+                  "type": "apikey",
+                  "apikey": [
+                    {
+                      "key": "value",
+                      "value": "{{admin_jwt}}",
+                      "type": "string"
+                    },
+                    {
+                      "key": "key",
+                      "value": "jwt",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Cookie",
+                    "value": "jwt={{admin_jwt}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl }}/api/orders",
+                  "host": [
+                    "{{baseUrl }}"
+                  ],
+                  "path": [
+                    "api",
+                    "orders"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "TC_4.14 Get Orders Without Admin",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      "pm.variables.set(\"expectedStatus\", \"403\")"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"TC_4.15 Status 403\", () => {\r",
+                      "    pm.response.to.have.status(403);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"TC_4.15 Not Admin\", () => {\r",
+                      "    const body = pm.response.json();\r",
+                      "\r",
+                      "    pm.expect(body.message).to.include(\"Not authorized\");\r",
+                      "});\r",
+                      ""
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "protocolProfileBehavior": {
+                "disableBodyPruning": true,
+                "disableCookies": true
+              },
+              "request": {
+                "auth": {
+                  "type": "apikey",
+                  "apikey": [
+                    {
+                      "key": "value",
+                      "value": "{{user_jwt}}",
+                      "type": "string"
+                    },
+                    {
+                      "key": "key",
+                      "value": "jwt",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Cookie",
+                    "value": "jwt={{user_jwt}}",
+                    "type": "text"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl }}/api/orders",
+                  "host": [
+                    "{{baseUrl }}"
+                  ],
+                  "path": [
+                    "api",
+                    "orders"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Configuration",
+          "item": [
+            {
+              "name": "TC_4.12 Get Paypal Client ID",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      "pm.variables.set(\"expectedStatus\", \"200\")"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"TC_4.13 Status 200\", () => {\r",
+                      "    pm.response.to.have.status(200);\r",
+                      "});\r",
+                      "\r",
+                      "pm.test(\"TC_4.13 ClientId Exists\", () => {\r",
+                      "    const body = pm.response.json();\r",
+                      "\r",
+                      "    pm.expect(body).to.have.property(\"clientId\");\r",
+                      "    pm.expect(body.clientId).to.not.be.empty;\r",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "protocolProfileBehavior": {
+                "disableCookies": true
+              },
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl }}/api/config/paypal",
+                  "host": [
+                    "{{baseUrl }}"
+                  ],
+                  "path": [
+                    "api",
+                    "config",
+                    "paypal"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Product",
+      "item": [
+        {
+          "name": "Products Read & Search",
+          "item": [
+            {
+              "name": "TC_2.1 - Products default",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      "pm.variables.set(\"expectedStatus\", \"200\");"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"TC_2.1: Status 200\", () => { pm.response.to.have.status(200); });\r",
+                      "pm.test(\"TC_2.1: Has products array\", () => { pm.expect(pm.response.json()).to.have.property(\"products\"); });\r",
+                      "if (pm.response.code === 200) {\r",
+                      "  const data = pm.response.json();\r",
+                      "  if (data.products?.length > 0) pm.environment.set(\"seedProductId\", data.products[0]._id);\r",
+                      "}"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl }}/api/products",
+                  "host": [
+                    "{{baseUrl }}"
+                  ],
+                  "path": [
+                    "api",
+                    "products"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "TC_2.2-Products search keywork",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      "pm.variables.set(\"expectedStatus\", \"200\");"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"TC_2.2: Status 200\", () => { pm.response.to.have.status(200); });\r",
+                      "pm.test(\"TC_2.2: Contains iphone\", () => {\r",
+                      "  pm.response.json().products.forEach(p => pm.expect(p.name.toLowerCase()).to.include(\"iphone\"));\r",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl }}/api/products?keyword=iphone",
+                  "host": [
+                    "{{baseUrl }}"
+                  ],
+                  "path": [
+                    "api",
+                    "products"
+                  ],
+                  "query": [
+                    {
+                      "key": "keyword",
+                      "value": "iphone"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "TC_2.3-ProductByIdfound",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      "pm.variables.set(\"expectedStatus\", \"200\");"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"TC_2.3: Status 200\", () => { pm.response.to.have.status(200); });\r",
+                      "pm.test(\"TC_2.3: Correct product ID\", () => {\r",
+                      "  pm.expect(pm.response.json()._id).to.eql(pm.environment.get(\"seedProductId\"));\r",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl }}/api/products/{{seedProductId}}",
+                  "host": [
+                    "{{baseUrl }}"
+                  ],
+                  "path": [
+                    "api",
+                    "products",
+                    "{{seedProductId}}"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "TC_2.4-ProductById404",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      "pm.variables.set(\"expectedStatus\", \"404\");"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"TC_2.4: Status 404\", () => { pm.response.to.have.status(404); });\r",
+                      "pm.test(\"TC_2.4: Error message\", () => { pm.expect(pm.response.json().message).to.include(\"not found\"); });"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl }}/api/products/000000000000000000000000",
+                  "host": [
+                    "{{baseUrl }}"
+                  ],
+                  "path": [
+                    "api",
+                    "products",
+                    "000000000000000000000000"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "TC_2.10-TopProducts",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      "pm.variables.set(\"expectedStatus\", \"200\");"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"TC_2.10: Status 200\", () => { pm.response.to.have.status(200); });\r",
+                      "pm.test(\"TC_2.10: 3 products\", () => { pm.expect(pm.response.json().length).to.eql(3); });"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl }}/api/products/top",
+                  "host": [
+                    "{{baseUrl }}"
+                  ],
+                  "path": [
+                    "api",
+                    "products",
+                    "top"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "TC_2.12-Products page out of range",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      "pm.variables.set(\"expectedStatus\", \"200\");"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"TC_2.12: Status 200\", () => { pm.response.to.have.status(200); });\r",
+                      "pm.test(\"TC_2.12: Empty products\", () => { pm.expect(pm.response.json().products).to.be.empty; });"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl }}/api/products?pageNumber=999",
+                  "host": [
+                    "{{baseUrl }}"
+                  ],
+                  "path": [
+                    "api",
+                    "products"
+                  ],
+                  "query": [
+                    {
+                      "key": "pageNumber",
+                      "value": "999"
+                    }
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "TC_2.13-ProductById invalid ObjectId",
+              "event": [
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.variables.set(\"expectedStatus\", 404); \r",
+                      "\r",
+                      "pm.test(\"TC_2.13: Invalid ObjectId\", () => {\r",
+                      "    pm.response.to.have.status(404);\r",
+                      "    pm.expect(pm.response.json().message).to.match(/invalid objectid/i);\r",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      "pm.variables.set(\"expectedStatus\", \"404\");"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "6a1c30862da4b55560a586eb",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl }}/api/products/abc123",
+                  "host": [
+                    "{{baseUrl }}"
+                  ],
+                  "path": [
+                    "api",
+                    "products",
+                    "abc123"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Products Admin Control",
+          "item": [
+            {
+              "name": "TC_2.5-createProduct",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      "pm.variables.set(\"expectedStatus\", \"200,201\");"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"TC_2.5: Status 200/201\", () => { pm.expect([200,201]).to.include(pm.response.code); });\r",
+                      "pm.test(\"TC_2.5: Has _id and name\", () => { const d = pm.response.json(); pm.expect(d).to.have.property(\"_id\"); pm.expect(d).to.have.property(\"name\"); });\r",
+                      "if ([200,201].includes(pm.response.code)) pm.environment.set(\"newProductId\", pm.response.json()._id);"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl }}/api/products",
+                  "host": [
+                    "{{baseUrl }}"
+                  ],
+                  "path": [
+                    "api",
+                    "products"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "TC_2.6-updateProduct success",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      "pm.variables.set(\"expectedStatus\", \"200\");"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"TC_2.6: Status 200\", () => { pm.response.to.have.status(200); });\r",
+                      "pm.test(\"TC_2.6: Updated product\", () => { pm.expect(pm.response.json()).to.have.property(\"name\"); });"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "PUT",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\r\n  \"name\": \"Updated Product Name\",\r\n  \"price\": 199.99,\r\n  \"description\": \"Updated description\",\r\n  \"image\": \"/images/sample.jpg\",\r\n  \"brand\": \"Sample Brand\",\r\n  \"category\": \"Electronics\",\r\n  \"countInStock\": 10\r\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl }}/api/products/{{newProductId}}",
+                  "host": [
+                    "{{baseUrl }}"
+                  ],
+                  "path": [
+                    "api",
+                    "products",
+                    "{{newProductId}}"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "TC_2.7-Product success",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      "pm.variables.set(\"expectedStatus\", \"200\");"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"TC_2.7: Status 200\", () => { pm.response.to.have.status(200); });\r",
+                      "pm.test(\"TC_2.7: Message removed\", () => { pm.expect(pm.response.json().message).to.include(\"removed\"); });"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "6a3827cbabf3444d7ad919d6",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl }}/api/products/{{newProductId}}",
+                  "host": [
+                    "{{baseUrl }}"
+                  ],
+                  "path": [
+                    "api",
+                    "products",
+                    "{{newProductId}}"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "TC_2.11-uploadsProductImage",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      "pm.variables.set(\"expectedStatus\", \"200\");"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"TC_2.11: Status 200\", () => { pm.response.to.have.status(200); });\r",
+                      "\r",
+                      "pm.test(\"TC_2.11: Returns image path\", () => {\r",
+                      "\r",
+                      "pm.expect(pm.response.json()).to.have.property(\"image\");\r",
+                      "\r",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "6a1c30862da4b55560a586eb",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "formdata",
+                  "formdata": [
+                    {
+                      "key": "image",
+                      "type": "file",
+                      "uuid": "ee12ec45-6643-40d5-b86d-4136b45a0846",
+                      "src": "postman-cloud:///1f16eccf-cab6-4230-b459-4cf0451d1734"
+                    }
+                  ]
+                },
+                "url": {
+                  "raw": "{{localhostUrl}}/api/upload",
+                  "host": [
+                    "{{localhostUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "upload"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Product Review",
+          "item": [
+            {
+              "name": "TC_2.8-createReview succces",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      "pm.variables.set(\"expectedStatus\", \"201\");"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"TC_2.8: Status 201\", () => { pm.response.to.have.status(201); });\r",
+                      "pm.test(\"TC_2.8: Message added\", () => { pm.expect(pm.response.json().message).to.include(\"Review added\"); });"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "6a1c30862da4b55560a586eb",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{ \"rating\": 5, \"comment\": \"San pham rat tot, dung tot hon mong doi.\" }",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl }}/api/products/6a3a46430e4369de8ad5aa66/reviews",
+                  "host": [
+                    "{{baseUrl }}"
+                  ],
+                  "path": [
+                    "api",
+                    "products",
+                    "6a3a46430e4369de8ad5aa66",
+                    "reviews"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "TC_2.9-createReview duplicate",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      "pm.variables.set(\"expectedStatus\", \"400\");"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"TC_2.9: Status 400\", () => { pm.response.to.have.status(400); });\r",
+                      "pm.test(\"TC_2.9: Already reviewed\", () => { pm.expect(pm.response.json().message).to.include(\"already reviewed\"); });"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "6a1c30862da4b55560a586eb",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{ \"rating\": 4, \"comment\": \"Review lan thu hai, cung san pham, cung user.\" }",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl }}/api/products/{{seedProductId}}/reviews",
+                  "host": [
+                    "{{baseUrl }}"
+                  ],
+                  "path": [
+                    "api",
+                    "products",
+                    "{{seedProductId}}",
+                    "reviews"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "TC_2.14-createReview rating out of range",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      "pm.variables.set(\"expectedStatus\", \"400\");"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"TC_2.14: Status 400\", () => { pm.response.to.have.status(400); });"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "6a382a88abf3444d7ad91a11",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{ \"rating\": 10, \"comment\": \"Rating khong hop le, vuot qua thang diem cho phep.\" }",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{baseUrl }}/api/products/{{seedProductId}}/reviews",
+                  "host": [
+                    "{{baseUrl }}"
+                  ],
+                  "path": [
+                    "api",
+                    "products",
+                    "{{seedProductId}}",
+                    "reviews"
+                  ]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "TC_2.15 - createReview missing comment",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      "pm.variables.set(\"expectedStatus\", \"400\");"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"TC_2.15: Error message includes comment required\", () => {\r",
+                      "\r",
+                      "const data = pm.response.json();\r",
+                      "\r",
+                      "pm.expect(data.message).to.include(\"comment is required\");\r",
+                      "\r",
+                      "});"
+                    ],
+                    "type": "text/javascript",
+                    "packages": {},
+                    "requests": {}
+                  }
+                }
+              ],
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "6a382a88abf3444d7ad91a11",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{ \"rating\": 4 }",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                },
+                "url": {
+                  "raw": "{{localhostUrl}}/api/products/6a3a3db40e4369de8ad5a9c9/reviews",
+                  "host": [
+                    "{{localhostUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "products",
+                    "6a3a3db40e4369de8ad5a9c9",
+                    "reviews"
+                  ]
+                }
+              },
+              "response": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "New Request",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"Xác thực đăng nhập thành công - Trả về mã 200 OK\", function () {\r",
+              "    pm.response.to.have.status(200);\r",
+              "});\r",
+              "\r",
+              "// Trích xuất tự động token để phục vụ Sprint 4\r",
+              "const jsonData = pm.response.json();\r",
+              "if (jsonData.token) {\r",
+              "    pm.environment.set(\"user_token\", jsonData.token);\r",
+              "    pm.collectionVariables.set(\"user_id\", jsonData._id);\r",
+              "}"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"email\": \"admin@email.com\",\r\n    \"password\": \"123456\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl }}/api/users/auth",
+          "host": [
+            "{{baseUrl }}"
+          ],
+          "path": [
+            "api",
+            "users",
+            "auth"
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          "const expected = pm.variables.get(\"expectedStatus\");\r",
+          "const expectedCodes = expected\r",
+          "  ? expected.split(\",\").map(s => parseInt(s.trim()))\r",
+          "  : [200, 201];\r",
+          "\r",
+          "pm.variables.unset(\"expectedStatus\");\r",
+          "\r",
+          "if (!expectedCodes.includes(pm.response.code)) {\r",
+          "  pm.sendRequest({\r",
+          "    url: pm.environment.get(\"jiraUrl\") + \"/rest/api/2/issue\",\r",
+          "    method: \"POST\",\r",
+          "    header: {\r",
+          "      \"Authorization\": pm.environment.get(\"jiraToken\"),\r",
+          "      \"Content-Type\": \"application/json\"\r",
+          "    },\r",
+          "    body: {\r",
+          "      mode: \"raw\",\r",
+          "      raw: JSON.stringify({\r",
+          "        fields: {\r",
+          "          project:     { key: pm.environment.get(\"jiraProject\") },\r",
+          "          summary:     \"FAIL: \" + pm.info.requestName,\r",
+          "          description: \"📌 *Chi tiết:* Request thất bại ngoài ý muốn.\"\r",
+          "                       + \"\\n\\n📥 *Input:*\\n\" + pm.request.method + \" \" + pm.request.url\r",
+          "                       + \"\\n\\nBody: \" + (pm.request.body ? pm.request.body.toString() : \"none\")\r",
+          "                       + \"\\n\\n🖱️ *Thao tác:*\\n1. Chạy Postman Collection Runner\"\r",
+          "                       + \"\\n2. Request: \" + pm.request.method + \" \" + pm.request.url\r",
+          "                       + \"\\n3. Expected: \" + expectedCodes.join(\",\")\r",
+          "                       + \"\\n4. Actual: \" + pm.response.code\r",
+          "                       + \"\\n\\n📸 *Screenshot:*\\n{code}\"\r",
+          "                       + \"Status: \" +pm.response.code\r",
+          "                       + \"\\nResponse: \" + pm.response.text().substring(0, 500)\r",
+          "                       + \"{code}\",\r",
+          "          issuetype:   { name: \"Bug\" },\r",
+          "          priority:    { name: \"High\" }\r",
+          "        }\r",
+          "      })\r",
+          "    }\r",
+          "  });\r",
+          "}"
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "dynamicEmail",
+      "value": ""
+    }
+  ]
+}

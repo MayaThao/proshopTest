@@ -10,6 +10,11 @@ import { verifyPayPalPayment, checkIfNewTransaction } from '../utils/paypal.js';
 const addOrderItems = asyncHandler(async (req, res) => {
   const { orderItems, shippingAddress, paymentMethod } = req.body;
 
+  if (!shippingAddress) {
+    res.status(400);
+    throw new Error('Shipping address is required');
+  }
+
   if (orderItems && orderItems.length === 0) {
     res.status(400);
     throw new Error('No order items');

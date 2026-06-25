@@ -10,6 +10,11 @@ import { verifyPayPalPayment, checkIfNewTransaction } from '../utils/paypal.js';
 const addOrderItems = asyncHandler(async (req, res) => {
   const { orderItems, shippingAddress, paymentMethod } = req.body;
 
+  if (!shippingAddress) {
+    res.status(400);
+    throw new Error('Shipping address is required');
+  }
+
   if (orderItems && orderItems.length === 0) {
     res.status(400);
     throw new Error('No order items');
@@ -94,7 +99,11 @@ const updateOrderToPaid = asyncHandler(async (req, res) => {
 
   // check if this transaction has been used before
   const isNewTransaction = await checkIfNewTransaction(Order, req.body.id);
-  if (!isNewTransaction) throw new Error('Transaction has been used before');
+
+if (!isNewTransaction) {
+  res.status(400);
+  throw new Error('Transaction has been used before');
+}
 
   const order = await Order.findById(req.params.id);
 

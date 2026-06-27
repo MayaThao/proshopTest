@@ -1,0 +1,887 @@
+{
+  "info": {
+    "_postman_id": "4986d6c2-5342-490e-a82e-44c4d47841c2",
+    "name": "ProShopTest - Auth Only",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "login",
+          "item": [
+            {
+              "name": "TC_1.1 - Login success",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": ["pm.variables.set(\"expectedStatus\", \"200\");"],
+                    "type": "text/javascript"
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"TC_1.1: Status 200\", () => {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "pm.test(\"TC_1.1: Trả về userInfo\", () => {",
+                      "    const body = pm.response.json();",
+                      "    pm.expect(body).to.have.property('email');",
+                      "    pm.expect(body).to.have.property('name');",
+                      "});",
+                      "",
+                      "pm.test(\"TC_1.1: Cookie jwt được set\", () => {",
+                      "    pm.expect(pm.cookies.get('jwt')).to.not.be.undefined;",
+                      "});",
+                      "",
+                      "const jwt = pm.cookies.get('jwt');",
+                      "pm.environment.set('jwt', jwt);"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"admin@email.com\",\n  \"password\": \"123456\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/users/auth",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "users", "auth"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "TC_1.2 - Login wrong password",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": ["pm.variables.set(\"expectedStatus\", \"401\");"],
+                    "type": "text/javascript"
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"TC_1.2: Status 401\", () => {",
+                      "    pm.response.to.have.status(401);",
+                      "});",
+                      "",
+                      "pm.test(\"TC_1.2: Message lỗi\", () => {",
+                      "    const body = pm.response.json();",
+                      "    pm.expect(body.message).to.match(/invalid email or password/i);",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"admin@email.com\",\n  \"password\": \"wrongpass\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/users/auth",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "users", "auth"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "TC_1.3 - Login missing email",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": ["pm.variables.set(\"expectedStatus\", \"401\");"],
+                    "type": "text/javascript"
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"TC_1.3: Status 401\", () => {",
+                      "    pm.response.to.have.status(401);",
+                      "});",
+                      "",
+                      "pm.test(\"TC_1.3: Message lỗi\", () => {",
+                      "    const body = pm.response.json();",
+                      "    pm.expect(body.message).to.match(/invalid email or password/i);",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"password\": \"123456\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/users/auth",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "users", "auth"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "TC_1.11 - Login with non-existent email",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": ["pm.variables.set(\"expectedStatus\", \"401\");"],
+                    "type": "text/javascript"
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"TC_1.11: Status 401\", () => {",
+                      "    pm.response.to.have.status(401);",
+                      "});",
+                      "",
+                      "pm.test(\"TC_1.11: Error message\", () => {",
+                      "    const body = pm.response.json();",
+                      "    pm.expect(body.message).to.match(/invalid email or password/i);",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"nonexistent@email.com\",\n  \"password\": \"123456\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/users/auth",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "users", "auth"]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Register",
+          "item": [
+            {
+              "name": "TC_1.4 - Register success",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": ["pm.variables.set(\"expectedStatus\", \"201\");"],
+                    "type": "text/javascript"
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"TC_1.4: Status 201\", () => {",
+                      "    pm.response.to.have.status(201);",
+                      "});",
+                      "",
+                      "pm.test(\"TC_1.4: Trả về userInfo\", () => {",
+                      "    const body = pm.response.json();",
+                      "    pm.expect(body).to.have.property('email');",
+                      "    pm.expect(body).to.have.property('name');",
+                      "});",
+                      "",
+                      "pm.test(\"TC_1.4: Cookie jwt được set\", () => {",
+                      "    pm.expect(pm.cookies.get('jwt')).to.not.be.undefined;",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Test User\",\n  \"email\": \"newuser{{$randomInt}}@email.com\",\n  \"password\": \"123456\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/users",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "users"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "TC_1.12 - Register with empty password",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": ["pm.variables.set(\"expectedStatus\", \"400\");"],
+                    "type": "text/javascript"
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"TC_1.12: Status 400\", () => {",
+                      "    pm.response.to.have.status(400);",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Test User\",\n  \"email\": \"newuser456@email.com\",\n  \"password\": \"\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/users",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "users"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "TC_1.13 - Register with empty email",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": ["pm.variables.set(\"expectedStatus\", \"400\");"],
+                    "type": "text/javascript"
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"TC_1.13: Status 400\", () => {",
+                      "    pm.response.to.have.status(400);",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Test User\",\n  \"email\": \"\",\n  \"password\": \"123456\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/users",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "users"]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Logout",
+          "item": [
+            {
+              "name": "TC_1.6 - Logout",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": ["pm.variables.set(\"expectedStatus\", \"200\");"],
+                    "type": "text/javascript"
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"TC_1.6: Status 200\", () => {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "pm.test(\"TC_1.6: Message logged out\", () => {",
+                      "    const body = pm.response.json();",
+                      "    pm.expect(body.message).to.match(/logged out successfully/i);",
+                      "});",
+                      "",
+                      "pm.test(\"TC_1.6: Cookie jwt bị xóa\", () => {",
+                      "    pm.expect(pm.cookies.get('jwt')).to.be.undefined;",
+                      "});",
+                      "",
+                      "pm.environment.unset('jwt');"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/users/logout",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "users", "logout"]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Middleware",
+          "item": [
+            {
+              "name": "TC_1.7 - protect valid token",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": ["pm.variables.set(\"expectedStatus\", \"200\");"],
+                    "type": "text/javascript"
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"TC_1.7: Status 200\", () => {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "pm.test(\"TC_1.7: Trả về profile\", () => {",
+                      "    const body = pm.response.json();",
+                      "    pm.expect(body).to.have.property('email');",
+                      "    pm.expect(body).to.have.property('name');",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/users/profile",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "users", "profile"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "TC_1.8 - protect no token",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": ["pm.variables.set(\"expectedStatus\", \"401\");"],
+                    "type": "text/javascript"
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"TC_1.8: Status 401\", () => {",
+                      "    pm.response.to.have.status(401);",
+                      "});",
+                      "",
+                      "pm.test(\"TC_1.8: Not authorized\", () => {",
+                      "    const body = pm.response.json();",
+                      "    pm.expect(body.message).to.match(/not authorized/i);",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/users/profile",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "users", "profile"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "TC_1.9 - admin allowed",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": ["pm.variables.set(\"expectedStatus\", \"200\");"],
+                    "type": "text/javascript"
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"TC_1.9: Status 200\", () => {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "pm.test(\"TC_1.9: Trả về danh sách users\", () => {",
+                      "    const body = pm.response.json();",
+                      "    pm.expect(body).to.be.an('array');",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Cookie",
+                    "value": "jwt={{adminToken}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/users",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "users"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "TC_1.10 - admin forbidden",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      "pm.variables.set(\"expectedStatus\", \"403\");",
+                      "",
+                      "// Login user thường để lấy cookie",
+                      "pm.sendRequest({",
+                      "    url: pm.environment.get('baseUrl') + '/api/users/auth',",
+                      "    method: 'POST',",
+                      "    header: { 'Content-Type': 'application/json' },",
+                      "    body: {",
+                      "        mode: 'raw',",
+                      "        raw: JSON.stringify({ email: 'testuser123@email.com', password: '123456' })",
+                      "    }",
+                      "}, function(err, res) {",
+                      "    if (!err) {",
+                      "        const userJwt = res.cookies.get('jwt');",
+                      "        pm.environment.set('userToken', userJwt);",
+                      "    }",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"TC_1.10: Status 403\", () => {",
+                      "    pm.response.to.have.status(403);",
+                      "});",
+                      "",
+                      "pm.test(\"TC_1.10: Not authorized as admin\", () => {",
+                      "    const body = pm.response.json();",
+                      "    pm.expect(body.message).to.match(/not authorized as an admin/i);",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Cookie",
+                    "value": "jwt={{userToken}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/users",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "users"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "TC_1.14 - Update profile without token",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": ["pm.variables.set(\"expectedStatus\", \"401\");"],
+                    "type": "text/javascript"
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"TC_1.14: Status 401\", () => {",
+                      "    pm.response.to.have.status(401);",
+                      "});",
+                      "",
+                      "pm.test(\"TC_1.14: Not authorized\", () => {",
+                      "    const body = pm.response.json();",
+                      "    pm.expect(body.message).to.match(/not authorized/i);",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "PUT",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Test User\",\n  \"email\": \"\",\n  \"password\": \"123456\"\n}"
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/users/profile",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "users", "profile"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "TC_1.15 - Get profile after user deleted",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": [
+                      "pm.variables.set(\"expectedStatus\", \"404,401\");"
+                    ],
+                    "type": "text/javascript"
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"TC_1.15: Status 404 hoặc 401 (Bug: thực tế có thể 500)\", () => {",
+                      "    pm.expect([404, 401, 500]).to.include(pm.response.code);",
+                      "    if (pm.response.code === 500) {",
+                      "        console.log('⚠️ BUG: protect middleware không xử lý user đã bị xóa!');",
+                      "    }",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Cookie",
+                    "value": "jwt={{deletedUserJwt}}",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/users/profile",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "users", "profile"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "TC_1.16 - protect invalid token signature",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": ["pm.variables.set(\"expectedStatus\", \"401\");"],
+                    "type": "text/javascript"
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"TC_1.16: Status 401\", () => {",
+                      "    pm.response.to.have.status(401);",
+                      "});",
+                      "",
+                      "pm.test(\"TC_1.16: Token failed message\", () => {",
+                      "    const body = pm.response.json();",
+                      "    pm.expect(body.message).to.match(/not authorized, token failed/i);",
+                      "});"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Cookie",
+                    "value": "jwt=eyJhbGciOiJIUzI1NiJ9.fake.invalidsignature",
+                    "type": "text"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/users/profile",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "users", "profile"]
+                }
+              },
+              "response": []
+            }
+          ]
+        },
+        {
+          "name": "Setup",
+          "item": [
+            {
+              "name": "Setup - LoginAdminToken",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": ["pm.variables.set(\"expectedStatus\", \"200\");"],
+                    "type": "text/javascript"
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Setup: Login Admin thành công\", () => {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "const adminJwt = pm.cookies.get('jwt');",
+                      "pm.environment.set('adminToken', adminJwt);",
+                      "console.log('✅ Saved adminToken:', adminJwt);"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"admin@email.com\",\n  \"password\": \"123456\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/users/auth",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "users", "auth"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Setup - LoginUserToken",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": ["pm.variables.set(\"expectedStatus\", \"200\");"],
+                    "type": "text/javascript"
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Setup: Login User thành công\", () => {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "const userJwt = pm.cookies.get('jwt');",
+                      "pm.environment.set('userToken', userJwt);",
+                      "console.log('✅ Saved userToken:', userJwt);"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"testuser123@email.com\",\n  \"password\": \"123456\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/users/auth",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "users", "auth"]
+                }
+              },
+              "response": []
+            },
+            {
+              "name": "Setup - Login User To Delete",
+              "event": [
+                {
+                  "listen": "prerequest",
+                  "script": {
+                    "exec": ["pm.variables.set(\"expectedStatus\", \"200\");"],
+                    "type": "text/javascript"
+                  }
+                },
+                {
+                  "listen": "test",
+                  "script": {
+                    "exec": [
+                      "pm.test(\"Setup: Login User To Delete thành công\", () => {",
+                      "    pm.response.to.have.status(200);",
+                      "});",
+                      "",
+                      "const userJwt = pm.cookies.get('jwt');",
+                      "pm.environment.set('deletedUserJwt', userJwt);",
+                      "console.log('✅ Saved deletedUserJwt:', userJwt);"
+                    ],
+                    "type": "text/javascript"
+                  }
+                }
+              ],
+              "request": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"userdelete@email.com\",\n  \"password\": \"123456\"\n}",
+                  "options": { "raw": { "language": "json" } }
+                },
+                "url": {
+                  "raw": "{{baseUrl}}/api/users/auth",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "users", "auth"]
+                }
+              },
+              "response": []
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [""]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "const expected = pm.variables.get(\"expectedStatus\");",
+          "const expectedCodes = expected",
+          "  ? expected.split(\",\").map(s => parseInt(s.trim()))",
+          "  : [200, 201];",
+          "",
+          "pm.variables.unset(\"expectedStatus\");",
+          "",
+          "if (!expectedCodes.includes(pm.response.code)) {",
+          "  pm.sendRequest({",
+          "    url: pm.environment.get(\"jiraUrl\") + \"/rest/api/2/issue\",",
+          "    method: \"POST\",",
+          "    header: {",
+          "      \"Authorization\": pm.environment.get(\"jiraToken\"),",
+          "      \"Content-Type\": \"application/json\"",
+          "    },",
+          "    body: {",
+          "      mode: \"raw\",",
+          "      raw: JSON.stringify({",
+          "        fields: {",
+          "          project: { key: pm.environment.get(\"jiraProject\") },",
+          "          summary: \"FAIL: \" + pm.info.requestName,",
+          "          description: \"📌 *Chi tiết:* Request thất bại ngoài ý muốn.\"",
+          "                       + \"\\n\\n📥 *Input:*\\n\" + pm.request.method + \" \" + pm.request.url",
+          "                       + \"\\n\\nBody: \" + (pm.request.body ? pm.request.body.toString() : \"none\")",
+          "                       + \"\\n\\n🖱️ *Thao tác:*\\n1. Chạy Postman Collection Runner\"",
+          "                       + \"\\n2. Request: \" + pm.request.method + \" \" + pm.request.url",
+          "                       + \"\\n3. Expected: \" + expectedCodes.join(\",\")",
+          "                       + \"\\n4. Actual: \" + pm.response.code",
+          "                       + \"\\n\\n📸 *Screenshot:*\\n{code}\"",
+          "                       + \"Status: \" + pm.response.code",
+          "                       + \"\\nResponse: \" + pm.response.text().substring(0, 500)",
+          "                       + \"{code}\",",
+          "          issuetype: { name: \"Bug\" },",
+          "          priority: { name: \"High\" }",
+          "        }",
+          "      })",
+          "    }",
+          "  });",
+          "}"
+        ]
+      }
+    }
+  ]
+}

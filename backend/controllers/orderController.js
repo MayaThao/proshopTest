@@ -130,7 +130,7 @@ const updateOrderToDelivered = asyncHandler(async (req, res) => {
   if (order) {
     // thêm điều kiện kiểm tra đơn hàng
     if (!order.isPaid) {
-      res.status(400); 
+      res.status(400);
       throw new Error('Order not paid');
     }
 

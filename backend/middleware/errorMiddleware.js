@@ -11,6 +11,14 @@ const errorHandler = (err, req, res, next) => {
   // NOTE: checking for invalid ObjectId moved to it's own middleware
   // See README for further info.
 
+  // Mongoose validation error (vd: thiếu field required như comment)
+  if (err.name === 'ValidationError') {
+    statusCode = 400;
+    message = Object.values(err.errors)
+      .map((e) => e.message)
+      .join(', ');
+  }
+
   res.status(statusCode).json({
     message: message,
     stack: process.env.NODE_ENV === 'production' ? null : err.stack,

@@ -119,6 +119,10 @@ const createProductReview = asyncHandler(async (req, res) => {
     res.status(400);
     throw new Error('Rating is required');
   }
+  if (rating < 1 || rating > 5) {
+    res.status(400);
+    throw new Error('Rating must be between 1 and 5');
+  }
 
   const product = await Product.findById(req.params.id);
 

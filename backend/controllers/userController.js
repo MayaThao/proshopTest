@@ -159,6 +159,7 @@ const getUserById = asyncHandler(async (req, res) => {
     throw new Error('User not found');
   }
 });
+
 // @desc    Update user
 // @route   PUT /api/users/:id
 // @access  Private/Admin
@@ -167,8 +168,19 @@ const updateUser = asyncHandler(async (req, res) => {
 
   if (user) {
     user.name = req.body.name || user.name;
-    user.email = req.body.email || user.email;
     user.isAdmin = Boolean(req.body.isAdmin);
+
+    // 🛑 FIX FOR TC_5.13: Check if the new email is already taken by another user
+    if (req.body.email && req.body.email !== user.email) {
+      const emailExists = await User.findOne({ email: req.body.email });
+      
+      if (emailExists) {
+        res.status(400); // Explicitly set 400 Bad Request instead of allowing a 500 fallback
+        throw new Error('Email already in use'); // Return clean message instead of E11000 mongo error
+      }
+      
+      user.email = req.body.email;
+    }
 
     const updatedUser = await user.save();
 

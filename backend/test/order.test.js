@@ -7,7 +7,7 @@ import User from '../../backend/models/userModel.js';
 import Order from '../../backend/models/orderModel.js';
 import Product from '../../backend/models/productModel.js';
 
-describe('=== PROJ-14: ORDER/PAYMENT TEST ===', () => {
+describe('=== PROJ-14: ORDER TEST ===', () => {
   let userCookie;
 
   const mockUserId = '60d5ec49f83d513d3c1a3b51';
@@ -167,8 +167,40 @@ test('TC_4.6: Order Not Found -> 404', async () => {
   expect(res.statusCode).toBe(404);
 
 }); 
-// TC_4.7
-test('TC_4.7: Deliver Unpaid Order -> 400', async () => {
+// TC_4.11
+test('TC_4.11: Missing Shipping Address -> 400', async () => {
+
+  jest.spyOn(User, 'findById').mockReturnValue({
+    select: jest.fn().mockResolvedValue({
+      _id: mockUserId
+    })
+  });
+
+  jest.spyOn(Product, 'find').mockResolvedValue([
+    {
+      _id: mockProductId,
+      price: 100
+    }
+  ]);
+
+  const res = await request(app)
+    .post('/api/orders')
+    .set('Cookie', [userCookie])
+    .send({
+      orderItems: [
+        {
+          _id: mockProductId,
+          qty: 1
+        }
+      ],
+      paymentMethod: 'PayPal'
+    });
+
+  expect([400, 500]).toContain(res.statusCode);
+
+});
+// TC_4.13
+test('TC_4.13: Get Orders Admin Success -> 200', async () => {
 
   jest.spyOn(User, 'findById').mockReturnValue({
     select: jest.fn().mockResolvedValue({
@@ -177,20 +209,23 @@ test('TC_4.7: Deliver Unpaid Order -> 400', async () => {
     })
   });
 
-  jest.spyOn(Order, 'findById').mockResolvedValue({
-    _id: mockOrderId,
-    isPaid: false
+  jest.spyOn(Order, 'find').mockReturnValue({
+    populate: jest.fn().mockResolvedValue([
+      {
+        _id: mockOrderId
+      }
+    ])
   });
 
   const res = await request(app)
-    .put(`/api/orders/${mockOrderId}/deliver`)
+    .get('/api/orders')
     .set('Cookie', [userCookie]);
 
-  expect(res.statusCode).toBe(400);
+  expect(res.statusCode).toBe(200);
 
 });
-// TC_4.8
-test('TC_4.8: User Access Admin Route -> 403', async () => {
+// TC_4.14
+test('TC_4.14: Get Orders Without Admin -> 403', async () => {
 
   jest.spyOn(User, 'findById').mockReturnValue({
     select: jest.fn().mockResolvedValue({

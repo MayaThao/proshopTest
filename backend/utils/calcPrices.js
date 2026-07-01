@@ -1,6 +1,5 @@
-function addDecimals(num) {
-  return (Math.round(num * 100) / 100).toFixed(2);
-}
+export const addDecimals = (num) =>
+  (Math.round((num + Number.EPSILON) * 100) / 100).toFixed(2);
 
 // NOTE: the code below has been changed from the course code to fix an issue
 // with type coercion of strings to numbers.

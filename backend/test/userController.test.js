@@ -104,7 +104,7 @@ describe('=== TÍNH NĂNG 3 — KIỂM THỬ THÔNG TIN CÁ NHÂN (Sprint 2 - PR
     const res = await request(app)
       .put('/api/users/profile')
       .set('Cookie', [regularUserCookie])
-      .send({ name: 'Nguyễn Nhật Tùng Updated', email: 'tung.updated@example.com' });
+     .send({ name: 'Nguyễn Nhật Tùng Updated', email: 'tung.updated.fixbug.999@example.com' });
 
     expect(res.statusCode).toBe(200);
     expect(res.body.name).toEqual('Nguyễn Nhật Tùng Updated');

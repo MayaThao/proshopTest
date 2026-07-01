@@ -25,7 +25,7 @@ describe('===  ORDER PAYMENT TEST ===', () => {
 
     process.env.JWT_SECRET = 'chuoi_bi_mat_test_123';
 
-    // ⚠️ IMPORT SAU KHI MOCK
+    //  IMPORT SAU KHI MOCK
     const server = await import('../../backend/server.js');
     app = server.default;
 
@@ -120,15 +120,23 @@ test('TC_4.8: User Access Admin Deliver Route -> 403', async () => {
 // TC_4.10
 test('TC_4.10: Duplicate Transaction -> 400/500', async () => {
 
-  // PayPal verify thành công
+  // 1. THÊM ĐOẠN NÀY: Giả lập đơn hàng CHƯA thanh toán
+  jest.spyOn(Order, 'findById').mockResolvedValue({
+    _id: mockOrderId,
+    totalPrice: 100,
+    isPaid: false, //  không bị lỗi "already been paid"
+  });
+
+  // 2. PayPal verify thành công
   mockVerifyPayPalPayment.mockResolvedValue({
     verified: true,
     value: '100.00',
   });
 
-  // Transaction đã tồn tại
+  // 3. Transaction đã tồn tại
   mockCheckIfNewTransaction.mockResolvedValue(false);
 
+  // 4. Gọi API
   const res = await request(app)
     .put(`/api/orders/${mockOrderId}/pay`)
     .set('Cookie', [userCookie])
@@ -141,12 +149,9 @@ test('TC_4.10: Duplicate Transaction -> 400/500', async () => {
       },
     });
 
-  // Tùy middleware của project có thể trả 400 hoặc 500
+  // 5. Kiểm tra đúng thông báo lỗi
   expect([400, 500]).toContain(res.statusCode);
-
-  // Kiểm tra đúng thông báo lỗi
   expect(res.body.message).toContain('Transaction has been used before');
-
 });
 test('TC_4.12: Get Paypal Client ID -> 200', async () => {
   process.env.PAYPAL_CLIENT_ID = 'test-client-id';

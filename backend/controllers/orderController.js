@@ -10,6 +10,11 @@ import { verifyPayPalPayment, checkIfNewTransaction } from '../utils/paypal.js';
 const addOrderItems = asyncHandler(async (req, res) => {
   const { orderItems, shippingAddress, paymentMethod } = req.body;
 
+  if (!shippingAddress) {
+    res.status(400);
+    throw new Error('Shipping address is required');
+  }
+
   if (orderItems && orderItems.length === 0) {
     res.status(400);
     throw new Error('No order items');
@@ -87,38 +92,54 @@ const getOrderById = asyncHandler(async (req, res) => {
 // @route   PUT /api/orders/:id/pay
 // @access  Private
 const updateOrderToPaid = asyncHandler(async (req, res) => {
-  // NOTE: here we need to verify the payment was made to PayPal before marking
-  // the order as paid
-  const { verified, value } = await verifyPayPalPayment(req.body.id);
-  if (!verified) throw new Error('Payment not verified');
-
-  // check if this transaction has been used before
-  const isNewTransaction = await checkIfNewTransaction(Order, req.body.id);
-  if (!isNewTransaction) throw new Error('Transaction has been used before');
-
+  // 1. Move Order fetching to the top to ensure the resource exists first
   const order = await Order.findById(req.params.id);
 
-  if (order) {
-    // check the correct amount was paid
-    const paidCorrectAmount = order.totalPrice.toString() === value;
-    if (!paidCorrectAmount) throw new Error('Incorrect amount paid');
-
-    order.isPaid = true;
-    order.paidAt = Date.now();
-    order.paymentResult = {
-      id: req.body.id,
-      status: req.body.status,
-      update_time: req.body.update_time,
-      email_address: req.body.payer.email_address,
-    };
-
-    const updatedOrder = await order.save();
-
-    res.json(updatedOrder);
-  } else {
+  if (!order) {
     res.status(404);
     throw new Error('Order not found');
   }
+
+  // Optional: Prevent reprocessing if the order has already been paid
+  if (order.isPaid) {
+    res.status(400);
+    throw new Error('This order has already been paid');
+  }
+
+  // 2. Verify payment from PayPal third-party API
+  const { verified, value } = await verifyPayPalPayment(req.body.id);
+  if (!verified) {
+    res.status(400); // FIX: Explicitly set 400 instead of allowing a 500 fallback
+    throw new Error('Payment not verified');
+  }
+
+  // 3. Check if this transaction has been used before (Anti-fraud check)
+  const isNewTransaction = await checkIfNewTransaction(Order, req.body.id);
+  if (!isNewTransaction) {
+    res.status(400);
+    throw new Error('Transaction has been used before');
+  }
+
+  // 4. Check if the correct amount was paid
+  const paidCorrectAmount = order.totalPrice.toString() === value;
+  if (!paidCorrectAmount) {
+    res.status(400); // FIX: Explicitly set 400 instead of allowing a 500 fallback
+    throw new Error('Incorrect amount paid');
+  }
+
+  // 5. Update order payment properties and save
+  order.isPaid = true;
+  order.paidAt = Date.now();
+  order.paymentResult = {
+    id: req.body.id,
+    status: req.body.status,
+    update_time: req.body.update_time,
+    email_address: req.body.payer?.email_address || req.body.email_address,
+  };
+
+  const updatedOrder = await order.save();
+
+  res.json(updatedOrder);
 });
 
 // @desc    Update order to delivered

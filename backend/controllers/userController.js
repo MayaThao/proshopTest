@@ -2,9 +2,9 @@ import asyncHandler from '../middleware/asyncHandler.js';
 import generateToken from '../utils/generateToken.js';
 import User from '../models/userModel.js';
 
-// @desc     Auth user & get token
-// @route    POST /api/users/auth
-// @access   Public
+// @desc    Auth user & get token
+// @route   POST /api/users/auth
+// @access  Public
 const authUser = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
 
@@ -25,11 +25,16 @@ const authUser = asyncHandler(async (req, res) => {
   }
 });
 
-// @desc     Register a new user
-// @route    POST /api/users
-// @access   Public
+// @desc    Register a new user
+// @route   POST /api/users
+// @access  Public
 const registerUser = asyncHandler(async (req, res) => {
   const { name, email, password } = req.body;
+
+  if (!name?.trim() || !email?.trim() || !password?.trim()) {
+    res.status(400);
+    throw new Error('Please add all fields');
+  }
 
   const userExists = await User.findOne({ email });
 
@@ -59,17 +64,17 @@ const registerUser = asyncHandler(async (req, res) => {
   }
 });
 
-// @desc     Logout user / clear cookie
-// @route    POST /api/users/logout
-// @access   Public
+// @desc    Logout user / clear cookie
+// @route   POST /api/users/logout
+// @access  Public
 const logoutUser = (req, res) => {
   res.clearCookie('jwt');
   res.status(200).json({ message: 'Logged out successfully' });
 };
 
-// @desc     Get user profile
-// @route    GET /api/users/profile
-// @access   Private
+// @desc    Get user profile
+// @route   GET /api/users/profile
+// @access  Private
 const getUserProfile = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user._id);
 
@@ -86,24 +91,13 @@ const getUserProfile = asyncHandler(async (req, res) => {
   }
 });
 
-// @desc     Update user profile
-// @route    PUT /api/users/profile
-// @access   Private
+// @desc    Update user profile
+// @route   PUT /api/users/profile
+// @access  Private
 const updateUserProfile = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user._id);
 
   if (user) {
-    // -----------------------------------------------------------------
-    // TẦNG VALIDATION: Bắt buộc trả về 400 'Email already in use' đúng ý sếp
-    if (req.body.email && req.body.email !== user.email) {
-      const emailExists = await User.findOne({ email: req.body.email });
-      if (emailExists) {
-        res.status(400);
-        throw new Error('Email already in use');
-      }
-    }
-    // -----------------------------------------------------------------
-
     user.name = req.body.name || user.name;
     user.email = req.body.email || user.email;
 
@@ -125,17 +119,17 @@ const updateUserProfile = asyncHandler(async (req, res) => {
   }
 });
 
-// @desc     Get all users
-// @route    GET /api/users
-// @access   Private/Admin
+// @desc    Get all users
+// @route   GET /api/users
+// @access  Private/Admin
 const getUsers = asyncHandler(async (req, res) => {
   const users = await User.find({});
   res.json(users);
 });
 
-// @desc     Delete user
-// @route    DELETE /api/users/:id
-// @access   Private/Admin
+// @desc    Delete user
+// @route   DELETE /api/users/:id
+// @access  Private/Admin
 const deleteUser = asyncHandler(async (req, res) => {
   const user = await User.findById(req.params.id);
 
@@ -152,9 +146,9 @@ const deleteUser = asyncHandler(async (req, res) => {
   }
 });
 
-// @desc     Get user by ID
-// @route    GET /api/users/:id
-// @access   Private/Admin
+// @desc    Get user by ID
+// @route   GET /api/users/:id
+// @access  Private/Admin
 const getUserById = asyncHandler(async (req, res) => {
   const user = await User.findById(req.params.id).select('-password');
 
@@ -166,16 +160,37 @@ const getUserById = asyncHandler(async (req, res) => {
   }
 });
 
-// @desc     Update user
-// @route    PUT /api/users/:id
-// @access   Private/Admin
+// @desc    Update user
+// @route   PUT /api/users/:id
+// @access  Private/Admin
 const updateUser = asyncHandler(async (req, res) => {
   const user = await User.findById(req.params.id);
 
   if (user) {
+    // -----------------------------------------------------------------
+    // TẦNG VALIDATION: Bắt buộc trả về 400 'Email already in use' đúng ý sếp
+    if (req.body.email && req.body.email !== user.email) {
+      const emailExists = await User.findOne({ email: req.body.email });
+      if (emailExists) {
+        res.status(400);
+        throw new Error('Email already in use');
+      }
+    }
+    // -----------------------------------------------------------------
     user.name = req.body.name || user.name;
-    user.email = req.body.email || user.email;
     user.isAdmin = Boolean(req.body.isAdmin);
+
+    // 🛑 FIX FOR TC_5.13: Check if the new email is already taken by another user
+    if (req.body.email && req.body.email !== user.email) {
+      const emailExists = await User.findOne({ email: req.body.email });
+      
+      if (emailExists) {
+        res.status(400); // Explicitly set 400 Bad Request instead of allowing a 500 fallback
+        throw new Error('Email already in use'); // Return clean message instead of E11000 mongo error
+      }
+      
+      user.email = req.body.email;
+    }
 
     const updatedUser = await user.save();
 

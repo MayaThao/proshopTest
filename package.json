@@ -25,7 +25,7 @@
     "report:userprofile": "npm run test:coverage:userprofile && npm run docs:update-coverage:userprofile",
     "test:coverage:order": "cross-env NODE_OPTIONS=--experimental-vm-modules jest backend/test/order.test.js backend/test/orderPayment.test.js backend/test/utils.test.js --forceExit --detectOpenHandles --coverage --coverageReporters=json-summary --collectCoverageFrom=\"backend/controllers/orderController.js\" --collectCoverageFrom=\"backend/utils/calcPrices.js\"",
     "docs:update-coverage:order": "node scripts/update-coverage.cjs Feature4_Order_TestDesign.md",
-"report:order": "npm run test:coverage:order && npm run docs:update-coverage:order",
+    "report:order": "npm run test:coverage:order && npm run docs:update-coverage:order",
     "test:coverage:admin": "cross-env NODE_OPTIONS=--experimental-vm-modules jest backend/test/adminRoutes.test.js backend/test/errorPaypal.test.js backend/test/adminRoutesErrorHandling.test.js --forceExit --detectOpenHandles --coverage --coverageReporters=json-summary --collectCoverageFrom=\"backend/controllers/orderController.js\" --collectCoverageFrom=\"backend/middleware/errorMiddleware.js\" --collectCoverageFrom=\"backend/utils/paypal.js\"",
     "docs:update-coverage:admin": "node scripts/update-coverage.cjs Feature5_Admin_TestDesign.md",
     "report:admin": "npm run test:coverage:admin && npm run docs:update-coverage:admin",

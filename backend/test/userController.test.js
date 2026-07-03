@@ -100,7 +100,7 @@ describe('=== TÍNH NĂNG 3 — KIỂM THỬ THÔNG TIN CÁ NHÂN (Sprint 2 - PR
       })
     };
     findByIdSpy.mockResolvedValueOnce(mockUserInstance);
-
+    jest.spyOn(User, 'findOne').mockResolvedValue(null);
     const res = await request(app)
       .put('/api/users/profile')
       .set('Cookie', [regularUserCookie])
@@ -127,7 +127,8 @@ describe('=== TÍNH NĂNG 3 — KIỂM THỬ THÔNG TIN CÁ NHÂN (Sprint 2 - PR
       save: jest.fn().mockResolvedValue({ _id: mockUserId })
     };
     findByIdSpy.mockResolvedValueOnce(mockUserInstance);
-
+    const findOneSpy = jest.spyOn(User, 'findOne');
+    
     const resUpdate = await request(app)
       .put('/api/users/profile')
       .set('Cookie', [regularUserCookie])
@@ -142,7 +143,7 @@ describe('=== TÍNH NĂNG 3 — KIỂM THỬ THÔNG TIN CÁ NHÂN (Sprint 2 - PR
       email: 'tung@example.com',
       matchPassword: jest.fn().mockResolvedValue(true) // Trả về true báo khớp mật khẩu
     };
-    jest.spyOn(User, 'findOne').mockResolvedValue(mockUserLogin);
+    findOneSpy.mockResolvedValueOnce(mockUserLogin);
 
     const resLogin = await request(app)
       .post('/api/users/auth')

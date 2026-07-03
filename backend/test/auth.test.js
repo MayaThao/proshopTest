@@ -113,4 +113,67 @@ describe('[F1] TC_1.1–1.6 Auth Unit Tests', () => {
     expect(cookies).toBeDefined();
     expect(cookies[0]).toMatch(/jwt=/);
   });
+
+  // TC_1.11: Login với email không tồn tại
+  test('TC_1.11 Login non-existent email → 401 Unauthorized', async () => {
+    jest.spyOn(User, 'findOne').mockResolvedValue(null);
+
+    const res = await request(app)
+      .post('/api/users/auth')
+      .send({ email: 'nonexistent@email.com', password: '123456' });
+
+    expect(res.statusCode).toBe(401);
+    expect(res.body.message).toMatch(/invalid email or password/i);
+  });
+
+  // TC_1.12: Register với password rỗng
+  test('TC_1.12 Register empty password → 400 Bad Request', async () => {
+    jest.spyOn(User, 'findOne').mockResolvedValue(null);
+
+    const res = await request(app)
+      .post('/api/users')
+      .send({ name: 'Test User', email: 'test@email.com', password: '' });
+
+    expect(res.statusCode).toBe(400);
+  });
+
+  // TC_1.13: Register với email rỗng
+  test('TC_1.13 Register empty email → 400 Bad Request', async () => {
+    jest.spyOn(User, 'findOne').mockResolvedValue(null);
+
+    const res = await request(app)
+      .post('/api/users')
+      .send({ name: 'Test User', email: '', password: '123456' });
+
+    expect(res.statusCode).toBe(400);
+  });
+
+  // TC_1.15: Get profile sau khi user bị xóa
+  test('TC_1.15 Get profile after user deleted → 401 Unauthorized', async () => {
+    jest.spyOn(User, 'findById').mockReturnValue({
+      select: jest.fn().mockResolvedValue(null), // user đã bị xóa → null
+    });
+
+    const deletedUserToken = jwt.sign(
+      { userId: '60d5ec49f83d513d3c1a3b99' },
+      process.env.JWT_SECRET
+    );
+
+    const res = await request(app)
+      .get('/api/users/profile')
+      .set('Cookie', [`jwt=${deletedUserToken}`]);
+
+    expect(res.statusCode).toBe(401);
+    expect(res.body.message).toMatch(/not authorized, user not found/i);
+  });
+
+  // TC_1.16: Token giả mạo (invalid signature)
+  test('TC_1.16 protect invalid token signature → 401 Unauthorized', async () => {
+    const res = await request(app)
+      .get('/api/users/profile')
+      .set('Cookie', ['jwt=eyJhbGciOiJIUzI1NiJ9.fake.invalidsignature']);
+
+    expect(res.statusCode).toBe(401);
+    expect(res.body.message).toMatch(/not authorized, token failed/i);
+  });
 });

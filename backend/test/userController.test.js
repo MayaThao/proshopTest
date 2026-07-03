@@ -152,4 +152,82 @@ describe('=== TÍNH NĂNG 3 — KIỂM THỬ THÔNG TIN CÁ NHÂN (Sprint 2 - PR
     expect(resLogin.statusCode).toBe(200);
     expect(resLogin.body).toHaveProperty('_id', mockUserId);
   });
+  // TC_3.9
+test('TC_3.9: Không cho phép cập nhật email đã tồn tại', async () => {
+
+  const findByIdSpy = jest.spyOn(User, 'findById');
+
+  // Middleware protect
+  findByIdSpy.mockReturnValueOnce({
+    select: jest.fn().mockResolvedValue({
+      _id: mockUserId
+    })
+  });
+
+  // Controller lấy user hiện tại
+  findByIdSpy.mockResolvedValueOnce({
+    _id: mockUserId,
+    name: 'Nguyễn Nhật Tùng',
+    email: 'tung@example.com'
+  });
+
+  // Email mới đã tồn tại
+  jest.spyOn(User, 'findOne').mockResolvedValue({
+    _id: 'anotherUser',
+    email: 'duplicate@example.com'
+  });
+
+  const res = await request(app)
+    .put('/api/users/profile')
+    .set('Cookie', [regularUserCookie])
+    .send({
+      email: 'duplicate@example.com'
+    });
+
+  expect(res.statusCode).toBe(400);
+
 });
+// TC_3.11
+test('TC_3.11: Không gửi dữ liệu cập nhật -> Giữ nguyên thông tin cũ', async () => {
+
+  const findByIdSpy = jest.spyOn(User, 'findById');
+
+  // middleware protect
+  findByIdSpy.mockReturnValueOnce({
+    select: jest.fn().mockResolvedValue({
+      _id: mockUserId
+    })
+  });
+
+  // controller update
+  const mockUser = {
+    _id: mockUserId,
+    name: 'Nguyễn Nhật Tùng',
+    email: 'tung@example.com',
+    isAdmin: false,
+    save: jest.fn().mockResolvedValue({
+      _id: mockUserId,
+      name: 'Nguyễn Nhật Tùng',
+      email: 'tung@example.com',
+      isAdmin: false
+    })
+  };
+
+  findByIdSpy.mockResolvedValueOnce(mockUser);
+
+  const res = await request(app)
+      .put('/api/users/profile')
+      .set('Cookie',[regularUserCookie])
+      .send({});
+
+  expect(res.statusCode).toBe(200);
+
+  expect(res.body.name)
+      .toBe('Nguyễn Nhật Tùng');
+
+  expect(res.body.email)
+      .toBe('tung@example.com');
+
+});
+
+  });

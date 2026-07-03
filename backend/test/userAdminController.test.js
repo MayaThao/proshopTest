@@ -95,4 +95,57 @@ describe('=== TÍNH NĂNG 3 — KIỂM THỬ QUẢN TRỊ USER (S3: TC_3.6 - TC_
     expect(res.statusCode).toBe(200);
     expect(res.body).toHaveProperty('_id', mockTargetUserId);
   });
+  // TC_3.10
+test('TC_3.10: GET /api/users/:id -> User không tồn tại trả về 404', async () => {
+
+  const findByIdSpy = jest.spyOn(User, 'findById');
+
+  // middleware protect
+  findByIdSpy.mockReturnValueOnce({
+    select: jest.fn().mockResolvedValue({
+      _id: mockAdminId,
+      isAdmin: true
+    })
+  });
+
+  // controller getUserById
+  findByIdSpy.mockReturnValueOnce({
+    select: jest.fn().mockResolvedValue(null)
+  });
+
+  const res = await request(app)
+    .get('/api/users/999999999999999999999999')
+    .set('Cookie', [adminCookie]);
+
+  expect(res.statusCode).toBe(404);
+
+});
+// TC_3.12
+test('TC_3.12: DELETE /api/users/:id -> Không được phép xóa Admin khác', async () => {
+
+  const findByIdSpy = jest.spyOn(User, 'findById');
+
+  // middleware protect
+  findByIdSpy.mockReturnValueOnce({
+    select: jest.fn().mockResolvedValue({
+      _id: mockAdminId,
+      isAdmin: true
+    })
+  });
+
+  // controller deleteUser
+  findByIdSpy.mockResolvedValueOnce({
+    _id: '60d5ec49f83d513d3c1a3b99',
+    name: 'Another Admin',
+    isAdmin: true
+  });
+
+  const res = await request(app)
+    .delete('/api/users/60d5ec49f83d513d3c1a3b99')
+    .set('Cookie', [adminCookie]);
+
+  expect(res.statusCode).toBe(400);
+
+});
+  
 });

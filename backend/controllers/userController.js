@@ -98,18 +98,20 @@ const updateUserProfile = asyncHandler(async (req, res) => {
   const user = await User.findById(req.user._id);
 
   if (user) {
+    user.name = req.body.name || user.name;
+
     // -----------------------------------------------------------------
-    // TẦNG VALIDATION: Bắt buộc trả về 400 'Email already in use' đúng ý sếp
+    // TẦNG VALIDATION & CẬP NHẬT EMAIL GỘP CHUNG
     if (req.body.email && req.body.email !== user.email) {
       const emailExists = await User.findOne({ email: req.body.email });
       if (emailExists) {
         res.status(400);
         throw new Error('Email already in use');
       }
+      // Nếu không trùng thì mới cập nhật email mới vào đây
+      user.email = req.body.email; 
     }
     // -----------------------------------------------------------------
-    user.name = req.body.name || user.name;
-    user.email = req.body.email || user.email;
 
     if (req.body.password) {
       user.password = req.body.password;
